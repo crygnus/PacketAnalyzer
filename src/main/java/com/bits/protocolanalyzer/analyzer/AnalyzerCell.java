@@ -5,9 +5,12 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.bits.protocolanalyzer.analyzer.event.EndAnalysisEvent;
+import com.bits.protocolanalyzer.analyzer.event.PacketProcessEndEvent;
 import com.bits.protocolanalyzer.analyzer.event.PacketTypeDetectionEvent;
 import com.bits.protocolanalyzer.utils.EventBusFactory;
 import com.google.common.eventbus.EventBus;
@@ -26,15 +29,23 @@ import lombok.Setter;
 @Scope(value = "prototype")
 @Getter
 @Setter
-public class AnalyzerCell {
+public class AnalyzerCell extends Thread {
 
+    @Autowired
+    private EventBusFactory eventBusFactory;
+
+    private String cellID;
     private String eventBusName;
     private EventBus eventBus;
     private GenericAnalyzer genericAnalyzer;
     private PacketWrapper packetProcessing;
     private Queue<PacketWrapper> inputQueue;
     private boolean isProcessing;
+    private boolean isRunning;
     private Map<String, AnalyzerCell> destinationStageMap;
+
+    // temp. For testing only
+    private int count = 0;
 
     /**
      * Provide the sessionId in which this cell is placed, the generic analyzer
@@ -42,20 +53,24 @@ public class AnalyzerCell {
      * eventbus name will be "sessionId_eventBusNameSuffix".
      * 
      * @param sessionId
+     * @param cellID
      * @param analyzer
-     * @param eventBusNameSuffix
      */
-    public void configure(String sessionId, GenericAnalyzer analyzer,
-            String eventBusNameSuffix, EventBusFactory factory) {
+    public void configure(String sessionId, String cellID,
+            GenericAnalyzer analyzer) {
 
-        this.eventBusName = sessionId + "_" + eventBusNameSuffix;
-        this.eventBus = factory.getEventBus(this.eventBusName);
+        this.cellID = cellID;
+        this.eventBusName = sessionId + "_" + cellID + "_event_bus";
+        this.eventBus = eventBusFactory.getEventBus(eventBusName);
         this.genericAnalyzer = analyzer;
         this.genericAnalyzer.setEventBus(eventBus);
         this.eventBus.register(this);
+        eventBusFactory.getEventBus("pipeline_controller_bus").register(this);
         this.inputQueue = new ConcurrentLinkedQueue<PacketWrapper>();
         this.isProcessing = false;
+        this.isRunning = true;
         this.destinationStageMap = new ConcurrentHashMap<String, AnalyzerCell>();
+
     }
 
     /**
@@ -68,13 +83,34 @@ public class AnalyzerCell {
     public void takePacket(PacketWrapper packet) {
 
         this.inputQueue.add(packet);
-        if (!this.isProcessing) {
-            this.isProcessing = true;
-            process(this.inputQueue.poll());
+        /*
+         * if (!this.isProcessing) { this.isProcessing = true;
+         * process(this.inputQueue.poll()); }
+         */
+    }
+
+    @Subscribe
+    public void end(EndAnalysisEvent event) {
+        this.isRunning = false;
+    }
+
+    @Override
+    public void run() {
+        while (isRunning) {
+            if (!isProcessing) {
+                if (!inputQueue.isEmpty()) {
+                    isProcessing = true;
+                    process(inputQueue.peek());
+                }
+            }
         }
+        System.out.println("Ending the thread for " + this.cellID);
     }
 
     private void process(PacketWrapper packet) {
+        this.count++;
+        System.out.println("Packet processing count for " + this.cellID
+                + " is now = " + this.count);
         this.packetProcessing = packet;
         this.genericAnalyzer.analyzePacket(this.packetProcessing);
     }
@@ -90,6 +126,9 @@ public class AnalyzerCell {
     @Subscribe
     public void setNextPacketInfo(PacketTypeDetectionEvent event) {
 
+        System.out.println(
+                "Got inside the packet type detection event handling method in - "
+                        + this.eventBusName);
         this.packetProcessing.setPacketType(event.getNextPacketType());
         this.packetProcessing.setStartByte(event.getStartByte());
         this.packetProcessing.setEndByte(event.getEndByte());
@@ -101,17 +140,28 @@ public class AnalyzerCell {
 
         String destinationStageKey = this.packetProcessing.getPacketType();
 
+        System.out.println("Destinationstage key received for " + this.cellID
+                + " is: " + destinationStageKey);
         if (destinationStageMap.containsKey(destinationStageKey)) {
             AnalyzerCell nextCell = this.destinationStageMap
                     .get(destinationStageKey);
             nextCell.takePacket(this.packetProcessing);
+            System.out.println("Next cell is " + nextCell.getCellID());
+        } else {
+            EventBus controllerEventBus = eventBusFactory
+                    .getEventBus("pipeline_controller_bus");
+            controllerEventBus.post(new PacketProcessEndEvent());
         }
 
-        if (this.inputQueue.isEmpty()) {
-            this.isProcessing = false;
-        } else {
-            process(this.inputQueue.poll());
-        }
+        /* if (this.inputQueue.isEmpty()) { */
+        System.out.println("Input queue size for " + this.cellID + " is = "
+                + this.inputQueue.size());
+        this.isProcessing = false;
+        // remove the current packet from the input queue
+        inputQueue.remove();
+        /*
+         * } else { process(this.inputQueue.poll()); }
+         */
     }
 
     /**

@@ -110,7 +110,8 @@ public class TcpAnalyzer extends TransportAnalyzer {
             return Protocol.HTTP;
 
         default:
-            return Protocol.HTTP;
+            /* return Protocol.HTTP; */
+            return Protocol.END_PROTOCOL;
         }
     }
 

@@ -32,6 +32,11 @@ public class IPv4Analyzer extends NetworkAnalyzer {
     private int startByte;
     private int endByte;
 
+    // temp. For testing only
+    private int tcpCount = 0;
+    private int udpCount = 0;
+    private int otherCountNW = 0;
+
     public IPv4Analyzer(EventBus eventBus) {
         this.eventBus = eventBus;
         this.eventBus.register(this);
@@ -124,6 +129,11 @@ public class IPv4Analyzer extends NetworkAnalyzer {
             nae.setPacketLength(getLength());
             nae.setSource(getSource());
             nae.setDestination(getDestination());
+
+            System.out.println("Tcp count in nwcell = " + this.tcpCount);
+            System.out.println("Udp count in nwcell = " + this.udpCount);
+            System.out.println(
+                    "OthercountNW count in nwcell = " + this.otherCountNW);
         }
     }
 
@@ -132,12 +142,16 @@ public class IPv4Analyzer extends NetworkAnalyzer {
 
         switch (protocolInt) {
         case 6:
+            this.tcpCount++;
             return Protocol.TCP;
         case 17:
+            this.udpCount++;
             return Protocol.UDP;
 
         default:
-            return Protocol.TCP;
+            this.otherCountNW++;
+            /* return Protocol.TCP; */
+            return Protocol.END_PROTOCOL;
         }
     }
 
