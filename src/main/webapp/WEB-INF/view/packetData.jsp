@@ -20,8 +20,8 @@
         <br>
         <div class="row">
             <div class="col-md-4">
-                <form accept-charset="UTF-8" role="form" method="GET" action="<c:url value="/reader/analysis"/>">
-                    <button type="submit" class="btn btn-success btn-lg">Analyze Packets</button>
+                <form accept-charset="UTF-8" role="form" method="GET" action="<c:url value="/reader/stats-analysis"/>">
+                    <button type="submit" class="btn btn-success btn-lg">Show Pcap-file Stats</button>
                 </form>
             </div>
         </div>

@@ -5,10 +5,10 @@
  */
 package com.bits.protocolanalyzer.analyzer.transport;
 
-import org.pcap4j.packet.Packet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.bits.protocolanalyzer.analyzer.GenericAnalyzer;
 import com.bits.protocolanalyzer.analyzer.PacketWrapper;
 import com.bits.protocolanalyzer.analyzer.event.TransportLayerEvent;
 import com.bits.protocolanalyzer.persistence.entity.TransportAnalyzerEntity;
@@ -18,21 +18,21 @@ import com.google.common.eventbus.EventBus;
 /**
  *
  * @author amit
+ * @author crygnus
+ * 
  */
+
 @Component
-public class TransportAnalyzer {
+public class TransportAnalyzer implements GenericAnalyzer {
 
     @Autowired
     private TransportAnalyzerRepository transportAnalyzerRepository;
 
-    private PacketWrapper packetWrapper;
+    private EventBus transportEventBus;
 
-    public PacketWrapper getPacket() {
-        return packetWrapper;
-    }
-
-    public void setPacket(PacketWrapper packet) {
-        this.packetWrapper = packet;
+    @Override
+    public void setEventBus(EventBus eventBus) {
+        this.transportEventBus = eventBus;
     }
 
     public String getSourcePort() {
@@ -43,44 +43,31 @@ public class TransportAnalyzer {
         return null;
     }
 
-    public Long getAckNumber() {
-        return null;
+    public int getAckNumber() {
+        return 0;
     }
 
-    public Long getSeqNumber() {
-        return null;
+    public int getSeqNumber() {
+        return 0;
     }
 
-    public Packet getPayload() {
-        Packet p = packetWrapper.getPacket();
-        return p.getPayload();
-    }
+    public void publishToEventBus(TransportAnalyzerEntity tae,
+            PacketWrapper packetWrapper) {
 
-    public void passToHook(TransportAnalyzerEntity tae) {
-
-        // post the event to corresponding event-bus
-        EventBus transportLayerEventBus = TransportLayerEventBus
-                .getTransportLayerEventBus();
-        transportLayerEventBus
+        /* post the event to corresponding event-bus */
+        this.transportEventBus
                 .post(new TransportLayerEvent(packetWrapper, tae));
         transportAnalyzerRepository.save(tae);
     }
 
-    public void analyzeTransportLayer() {
+    public void analyzePacket(PacketWrapper packetWrapper) {
 
         // analyze and pass to hooks
         TransportAnalyzerEntity tae = new TransportAnalyzerEntity();
         tae.setPacketIdEntity(packetWrapper.getPacketIdEntity());
         transportAnalyzerRepository.save(tae);
 
-        passToHook(tae);
-
-        // pass to next layer
-        Packet p = getPayload();
-        packetWrapper.setPacket(p);
-        if (p != null) {
-            // pass to next layer
-        }
+        publishToEventBus(tae, packetWrapper);
 
     }
 

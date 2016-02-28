@@ -5,14 +5,12 @@
  */
 package com.bits.protocolanalyzer.analyzer.link;
 
-import org.pcap4j.packet.Packet;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
+import com.bits.protocolanalyzer.analyzer.GenericAnalyzer;
 import com.bits.protocolanalyzer.analyzer.PacketWrapper;
 import com.bits.protocolanalyzer.analyzer.event.LinkLayerEvent;
-import com.bits.protocolanalyzer.analyzer.network.NetworkAnalyzer;
 import com.bits.protocolanalyzer.persistence.entity.LinkAnalyzerEntity;
 import com.bits.protocolanalyzer.repository.LinkAnalyzerRepository;
 import com.google.common.eventbus.EventBus;
@@ -20,64 +18,45 @@ import com.google.common.eventbus.EventBus;
 /**
  *
  * @author amit
+ * @author crygnus
  */
-@Service
-@Configurable
-public class LinkAnalyzer {
 
-    @Autowired
-    private NetworkAnalyzer networkAnalyzer;
+@Component
+public class LinkAnalyzer implements GenericAnalyzer {
 
     @Autowired
     private LinkAnalyzerRepository linkAnalyzerRepository;
 
-    private PacketWrapper packetWrapper;
+    private EventBus linkLayerEventBus;
 
-    public PacketWrapper getPacket() {
-        return packetWrapper;
+    public void setEventBus(EventBus eventBus) {
+        this.linkLayerEventBus = eventBus;
     }
 
-    public void setPacket(PacketWrapper packet) {
-        this.packetWrapper = packet;
-    }
-
-    public String getSource() {
+    public String getSource(PacketWrapper packetWrapper) {
         return null;
     }
 
-    public String getDestination() {
+    public String getDestination(PacketWrapper packetWrapper) {
         return null;
     }
 
-    public Packet getPayload() {
-        Packet p = packetWrapper.getPacket();
-        return p.getPayload();
-    }
+    private void publishToEventBus(LinkAnalyzerEntity lae,
+            PacketWrapper packetWrapper) {
 
-    public void passToHook(LinkAnalyzerEntity lae) {
-
-        // post the event to corresponding event-bus
-        EventBus linkLayerEventBus = LinkLayerEventBus.getLinkLayerEventBus();
+        /* post the event to corresponding event-bus */
         linkLayerEventBus.post(new LinkLayerEvent(packetWrapper, lae));
         linkAnalyzerRepository.save(lae);
     }
 
-    public void analyzeLinkLayer() {
+    @Override
+    public void analyzePacket(PacketWrapper packetWrapper) {
 
-        // analyze and pass to hooks
         LinkAnalyzerEntity lae = new LinkAnalyzerEntity();
         lae.setPacketIdEntity(packetWrapper.getPacketIdEntity());
         linkAnalyzerRepository.save(lae);
 
-        passToHook(lae);
-
-        // get payload and pass to next analyzer
-        Packet p = getPayload();
-        packetWrapper.setPacket(p);
-        if (p != null) {
-            networkAnalyzer.setPacket(packetWrapper);
-            networkAnalyzer.analyzeNetworkLayer();
-        }
+        publishToEventBus(lae, packetWrapper);
     }
 
 }

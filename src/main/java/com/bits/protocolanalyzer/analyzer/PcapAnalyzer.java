@@ -5,48 +5,62 @@
  */
 package com.bits.protocolanalyzer.analyzer;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-import com.bits.protocolanalyzer.analyzer.link.LinkAnalyzer;
+import com.bits.protocolanalyzer.analyzer.event.PacketProcessEndEvent;
 import com.bits.protocolanalyzer.repository.PacketIdRepository;
+import com.google.common.eventbus.Subscribe;
 
 /**
  *
  * @author amit
+ * @author crygnus
  */
-@Service
-@Configurable
-public class PcapAnalyzer {
 
-    @Autowired
-    private LinkAnalyzer linkAnalyzer;
+@Component
+public class PcapAnalyzer {
 
     @Autowired
     private PacketIdRepository packetIdRepository;
 
-    private List<PacketWrapper> packets;
+    @Autowired
+    private Session session;
 
-    public List<PacketWrapper> getPackets() {
-        return packets;
+    private AnalyzerCell nextAnalyzerCell;
+    private long packetProcessedCount = 0;
+    private long packetReadCount = 0;
+    private boolean endAnalysis = false;
+
+    public void setNextAnalyzerCell(AnalyzerCell cell) {
+        this.nextAnalyzerCell = cell;
     }
 
-    public void setPackets(List<PacketWrapper> packets) {
-        this.packets = packets;
+    public AnalyzerCell getNextAnalyzerCell() {
+        return this.nextAnalyzerCell;
     }
 
-    public void analyzePackets() {
-        for (PacketWrapper p : packets) {
-            Object[] temp = packetIdRepository.findSequenceValue();
-            p.getPacketIdEntity().setPacketId(
-                    Integer.parseInt((temp[0].toString()) + 1));
-            packetIdRepository.save(p.getPacketIdEntity());
-            linkAnalyzer.setPacket(p);
-            linkAnalyzer.analyzeLinkLayer();
+    public void endAnalysis(long count) {
+        this.packetReadCount = count;
+        this.endAnalysis = true;
+    }
+
+    @Subscribe
+    public void incrementPacketProcessingCount(PacketProcessEndEvent event) {
+        this.packetProcessedCount++;
+        if (this.endAnalysis && packetProcessedCount == packetReadCount) {
+            session.endSession();
         }
+    }
+
+    public void analyzePacket(PacketWrapper currentPacket) {
+        Object[] temp = packetIdRepository.findSequenceValue();
+        currentPacket.getPacketIdEntity()
+                .setPacketId(Integer.parseInt((temp[0].toString()) + 1));
+
+        packetIdRepository.save(currentPacket.getPacketIdEntity());
+        AnalyzerCell cell = getNextAnalyzerCell();
+        cell.takePacket(currentPacket);
     }
 
 }
