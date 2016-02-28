@@ -44,9 +44,6 @@ public class AnalyzerCell extends Thread {
     private boolean isRunning;
     private Map<String, AnalyzerCell> destinationStageMap;
 
-    // temp. For testing only
-    private int count = 0;
-
     /**
      * Provide the sessionId in which this cell is placed, the generic analyzer
      * to be placed in the cell and the suffix for eventbus name. The eventual
@@ -75,18 +72,12 @@ public class AnalyzerCell extends Thread {
 
     /**
      * Receives the next packet (or the same packet if packet type detected has
-     * the corresponding analyzer in this cell itself), the type of the packet
-     * and startByte location from which the packet should be processed further.
+     * the corresponding analyzer in this cell itself)
      * 
      * @param packet
      */
     public void takePacket(PacketWrapper packet) {
-
         this.inputQueue.add(packet);
-        /*
-         * if (!this.isProcessing) { this.isProcessing = true;
-         * process(this.inputQueue.poll()); }
-         */
     }
 
     @Subscribe
@@ -104,13 +95,9 @@ public class AnalyzerCell extends Thread {
                 }
             }
         }
-        System.out.println("Ending the thread for " + this.cellID);
     }
 
     private void process(PacketWrapper packet) {
-        this.count++;
-        System.out.println("Packet processing count for " + this.cellID
-                + " is now = " + this.count);
         this.packetProcessing = packet;
         this.genericAnalyzer.analyzePacket(this.packetProcessing);
     }
@@ -125,10 +112,6 @@ public class AnalyzerCell extends Thread {
      */
     @Subscribe
     public void setNextPacketInfo(PacketTypeDetectionEvent event) {
-
-        System.out.println(
-                "Got inside the packet type detection event handling method in - "
-                        + this.eventBusName);
         this.packetProcessing.setPacketType(event.getNextPacketType());
         this.packetProcessing.setStartByte(event.getStartByte());
         this.packetProcessing.setEndByte(event.getEndByte());
@@ -139,29 +122,19 @@ public class AnalyzerCell extends Thread {
     private void sendPacket() {
 
         String destinationStageKey = this.packetProcessing.getPacketType();
-
-        System.out.println("Destinationstage key received for " + this.cellID
-                + " is: " + destinationStageKey);
         if (destinationStageMap.containsKey(destinationStageKey)) {
             AnalyzerCell nextCell = this.destinationStageMap
                     .get(destinationStageKey);
             nextCell.takePacket(this.packetProcessing);
-            System.out.println("Next cell is " + nextCell.getCellID());
         } else {
             EventBus controllerEventBus = eventBusFactory
                     .getEventBus("pipeline_controller_bus");
             controllerEventBus.post(new PacketProcessEndEvent());
         }
 
-        /* if (this.inputQueue.isEmpty()) { */
-        System.out.println("Input queue size for " + this.cellID + " is = "
-                + this.inputQueue.size());
         this.isProcessing = false;
-        // remove the current packet from the input queue
+        /* remove the current packet from the input queue */
         inputQueue.remove();
-        /*
-         * } else { process(this.inputQueue.poll()); }
-         */
     }
 
     /**

@@ -41,19 +41,14 @@ public class PcapAnalyzer {
     }
 
     public void endAnalysis(long count) {
-        /* session.endSession(); */
         this.packetReadCount = count;
-        System.out.println("Read packets so far " + this.packetReadCount);
         this.endAnalysis = true;
     }
 
     @Subscribe
     public void incrementPacketProcessingCount(PacketProcessEndEvent event) {
         this.packetProcessedCount++;
-        System.out.println(
-                "Processed packets so far = " + this.packetProcessedCount);
         if (this.endAnalysis && packetProcessedCount == packetReadCount) {
-            System.out.println("Ending this session!!");
             session.endSession();
         }
     }

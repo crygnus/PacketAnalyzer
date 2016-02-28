@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.bits.protocolanalyzer.analyzer.event.EndAnalysisEvent;
@@ -123,9 +122,6 @@ public class Session {
     }
 
     public void endSession() {
-        /*
-         * linkCell.end(); networkCell.end(); transportCell.end();
-         */
         factory.getEventBus("pipeline_controller_bus")
                 .post(new EndAnalysisEvent());
     }

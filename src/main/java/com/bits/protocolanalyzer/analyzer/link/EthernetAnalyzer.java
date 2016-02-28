@@ -31,11 +31,6 @@ public class EthernetAnalyzer extends LinkAnalyzer {
     private byte[] ethernetHeader;
     private int startByte;
     private int endByte;
-    
-    //temp. For testing only
-    private int ipv4Count = 0;
-    private int otherCount = 0;
-    private int defaultCount = 0;
 
     /**
      * Constructs the object and registers itself on the eventbus of the
@@ -100,9 +95,6 @@ public class EthernetAnalyzer extends LinkAnalyzer {
             LinkAnalyzerEntity lae = linkLayerEvent.getLinkAnalyzerEntity();
             lae.setSource(getSource(packetWrapper));
             lae.setDestination(getDestination(packetWrapper));
-            System.out.println("Ipv4 count = " + this.ipv4Count);
-            System.out.println("Ipv6 count = " + this.otherCount);
-            System.out.println("Other count = " + this.defaultCount);
         }
 
     }
@@ -113,16 +105,13 @@ public class EthernetAnalyzer extends LinkAnalyzer {
                 .getEtherType(this.ethernetHeader);
 
         switch (nextHeaderTypeHex) {
-        case "0x0800":
-            this.ipv4Count++;
+        case "0800":
             return Protocol.IPV4;
-        case "0x86DD":
-            this.otherCount++;
+        case "86DD":
             return Protocol.IPV6;
 
         default:
-            this.defaultCount++;
-            return Protocol.IPV4;
+            return Protocol.END_PROTOCOL;
         }
 
     }
