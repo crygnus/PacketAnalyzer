@@ -12,11 +12,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.bits.protocolanalyzer.analyzer.EventBusFactory;
 import com.bits.protocolanalyzer.analyzer.PacketWrapper;
 import com.bits.protocolanalyzer.analyzer.Session;
 import com.bits.protocolanalyzer.analyzer.TimeSeriesAnalyzer;
 import com.bits.protocolanalyzer.input.PcapFileReader;
-import com.bits.protocolanalyzer.utils.EventBusFactory;
 
 /**
  *
@@ -58,6 +58,8 @@ public class SessionController {
     @RequestMapping("/default")
     public ModelAndView setDefaultSession() {
         session.configureSession("default_session", factory);
+        System.out.println("Pipeline generation time start = "
+                + System.currentTimeMillis());
         session.setDefault();
         ModelAndView mav = new ModelAndView("packetData");
         mav.addObject("sessionName", session.getSessionName());

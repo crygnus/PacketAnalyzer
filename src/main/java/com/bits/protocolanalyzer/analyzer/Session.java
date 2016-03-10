@@ -13,7 +13,6 @@ import com.bits.protocolanalyzer.analyzer.network.IPv4Analyzer;
 import com.bits.protocolanalyzer.analyzer.network.NetworkAnalyzer;
 import com.bits.protocolanalyzer.analyzer.transport.TcpAnalyzer;
 import com.bits.protocolanalyzer.analyzer.transport.TransportAnalyzer;
-import com.bits.protocolanalyzer.utils.EventBusFactory;
 import com.google.common.eventbus.EventBus;
 
 import lombok.Getter;
@@ -110,6 +109,8 @@ public class Session {
         linkCell.configureDestinationStageMap(Protocol.IPV4, networkCell);
         networkCell.configureDestinationStageMap(Protocol.TCP, transportCell);
 
+        System.out.println("Pipeline generation time stop = "
+                + System.currentTimeMillis());
         linkCell.start();
         networkCell.start();
         transportCell.start();
