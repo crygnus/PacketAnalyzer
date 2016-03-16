@@ -6,7 +6,8 @@ window.ExperimentView = Backbone.View.extend({
 			 'click #loadExperiment' : 'loadExperiment'
 		},
 
-		newExperiment : function() {
+		newExperiment : function(event) {
+            event.preventDefault();
         	var formValues = {
         		experimentName : $('#experimentName').val(),
         		description : $('#description').val(),
