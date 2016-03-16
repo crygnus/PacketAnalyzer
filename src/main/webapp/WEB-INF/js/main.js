@@ -28,7 +28,6 @@ window.Router = Backbone.Router.extend({
         this.loginView.render();
     },
     experimentViewDisplay: function () {
-        debugger
         $.get( '/protocolanalyzer/auth', {loginHash : Cookies.get('userAuth')})
         .done(function(status){
             this.experimentView = new ExperimentView();
