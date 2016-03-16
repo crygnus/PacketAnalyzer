@@ -18,7 +18,8 @@ window.Router = Backbone.Router.extend({
     routes: {
         '':'loginViewDisplay',
         'home': 'experimentViewDisplay',
-        'config': 'configPlaygroundViewDisplay'
+        'config': 'configPlaygroundViewDisplay',
+        'analysis': 'analysisViewDisplay'
     },
 
     initialize: function () {
@@ -48,12 +49,14 @@ window.Router = Backbone.Router.extend({
             alert("You have been logged out. Please login to continue");
             app.navigate("#");
         });
-    
-
+    },
+    analysisViewDisplay: function(){
+        this.analysisView = new AnalysisView();
+        this.analysisView.render();
     }
 });
 
-templateLoader.load(["LoginView","ExperimentView","ConfigPlaygroundView"],
+templateLoader.load(["LoginView","ExperimentView","ConfigPlaygroundView","AnalysisView"],
     function () {
         app = new Router();
         Backbone.history.start();
