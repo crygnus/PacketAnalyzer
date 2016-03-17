@@ -15,7 +15,6 @@ window.ExperimentView = Backbone.View.extend({
         		testid : $('#testid').val(),
         		pcapfiles : $('#pcapfiles').val()
         	};
-            //do backend check here
         	app.navigate("#/config");
 
     	},
