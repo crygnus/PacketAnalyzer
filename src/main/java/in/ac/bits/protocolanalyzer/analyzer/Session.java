@@ -48,9 +48,6 @@ public class Session {
     private EventBusFactory factory;
 
     @Autowired
-    private PcapFileReader pcapFileReader;
-
-    @Autowired
     Protocol protocol;
 
     private String sessionName;
@@ -72,7 +69,7 @@ public class Session {
         linkCell.start();
         networkCell.start();
         transportCell.start();
-        return pcapFileReader.readFile();
+        return pcapAnalyzer.readFile();
     }
 
     public void attachCustomAnalyzer(int cellNumber,
