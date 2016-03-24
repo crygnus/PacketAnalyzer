@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import in.ac.bits.protocolanalyzer.analyzer.event.EndAnalysisEvent;
@@ -21,6 +22,7 @@ import lombok.Getter;
  *
  */
 @Component
+@Scope(value = "prototype")
 @Getter
 public class Session {
 
