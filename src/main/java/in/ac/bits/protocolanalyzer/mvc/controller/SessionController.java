@@ -5,8 +5,6 @@
  */
 package in.ac.bits.protocolanalyzer.mvc.controller;
 
-import java.util.List;
-
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.WebApplicationContext;
 
-import in.ac.bits.protocolanalyzer.analyzer.PacketWrapper;
 import in.ac.bits.protocolanalyzer.analyzer.Session;
 import in.ac.bits.protocolanalyzer.protocol.Protocol;
 import in.ac.bits.protocolanalyzer.protocol.ProtocolGraphParser;
@@ -34,24 +31,25 @@ public class SessionController {
 
     private Session session;
 
-    @Autowired
     private ProtocolGraphParser graphParser;
 
     @Autowired
-    Protocol protocol;
-
-    List<PacketWrapper> packets;
+    private Protocol protocol;
 
     @RequestMapping(value = "/analysis", method = RequestMethod.GET)
     public @ResponseBody String analyze(
             @RequestParam("graph") String protocolGraphStr) {
-        System.out.println("Got the graph String. Here it is - ");
-        System.out.println(protocolGraphStr);
+        System.out.println("Graph string parsed = \n" + protocolGraphStr);
+        // Initializing session and protocol
         init();
+        graphParser = context.getBean(ProtocolGraphParser.class);
         graphParser.configureSession(session, protocolGraphStr);
         System.out.println("Successfully completed session configuration!!");
-        /* long readCount = 0; */
-        long readCount = session.startExperiment();
+        /*
+         * later to be replaced by session.startExperiment() call return value
+         */
+        long readCount = 0;
+        /* long readCount = session.startExperiment(); */
         JSONObject response = new JSONObject();
         response.put("status", "success");
         response.put("pktCount", readCount);

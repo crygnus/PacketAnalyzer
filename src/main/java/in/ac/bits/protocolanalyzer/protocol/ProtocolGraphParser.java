@@ -1,85 +1,74 @@
 package in.ac.bits.protocolanalyzer.protocol;
 
-import java.util.Map;
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import in.ac.bits.protocolanalyzer.analyzer.CustomAnalyzer;
 import in.ac.bits.protocolanalyzer.analyzer.Session;
 
 @Component
+@Scope(value = "prototype")
 public class ProtocolGraphParser {
 
     @Autowired
     private ProtocolGraph protocolGraph;
 
-    private Map<String, CustomAnalyzer> protocolMap;
+    private ArrayList<String> graphLines = new ArrayList<String>();
 
     public void configureSession(Session session, String graphString) {
 
-        String[] graphLines = graphString.split("\\r?\\n");
-        removeBlanks(graphLines);
-        for (int i = 0; i < graphLines.length; i++) {
-            System.out.println(graphLines[i]);
+        String[] lines = graphString.split("\\r?\\n");
+        removeBlankLines(lines);
+        for (int i = 0; i < graphLines.size(); i++) {
+            System.out.println("Line: " + i + " " + graphLines.get(i));
         }
         int linePtr = 0;
         /*
          * Configure start node
          */
-        if (graphLines[linePtr].contains("start")) {
+
+        if (graphLines.get(linePtr).contains("start")) {
             int startPtr = linePtr;
-            while (!graphLines[linePtr].contains("}")) {
+            while (!graphLines.get(linePtr).contains("}")) {
                 linePtr++;
             }
             protocolGraph.configureStartNode(session, graphLines, startPtr,
                     linePtr);
-        } else {
-            // throw a custom exception which will be caught by session
-            // controller and remarks will be passed to front-end?????????
         }
-        /*
-         * Configure other graph nodes
-         */
-        linePtr += 2;
-        while (!graphLines[linePtr].contains("end")) {
-            int ptr = collectNodes(session, graphLines, linePtr);
-            if (ptr < graphLines.length) {
-                linePtr = ptr;
-            } else {
-                break;
-            }
+        linePtr++;
+        int count = 0;
+        while (!graphLines.get(linePtr).contains("end") && count < 5) {
+            linePtr = collectNodes(session, linePtr);
+            System.out.println("Line pointer now = " + linePtr);
+            count++;
         }
         protocolGraph.configureSessionCells(session);
     }
 
-    private int collectNodes(Session session, String[] graphLines,
-            int linePtr) {
+    private int collectNodes(Session session, int linePtr) {
         int startLine = linePtr;
-        System.out.println("Start line = " + graphLines[startLine]);
+        int lines = graphLines.size();
         linePtr++;
-        System.out.println("Line ptr line = " + graphLines[linePtr]);
-        int lines = graphLines.length;
-        System.out.println("Graph lines = " + lines);
-        System.out.println("Current linePtr = " + linePtr);
-        while (!graphLines[linePtr].contains("graph_")) {
-            linePtr++;
-            if (linePtr >= lines) {
+        while (linePtr < lines) {
+            if (!graphLines.get(linePtr).contains("graph")) {
+                linePtr++;
+            } else {
                 break;
             }
         }
-        System.out.println(
-                "Line ptr line (end of while) = " + graphLines[linePtr]);
+
         protocolGraph.configureNode(session, graphLines, startLine,
-                linePtr - 2);
+                linePtr - 1);
         return linePtr;
     }
 
-    private void removeBlanks(String[] graphLines) {
-
-        for (int i = 0; i < graphLines.length; i++) {
-            graphLines[i] = graphLines[i].replaceAll("\\s", "");
+    private void removeBlankLines(String[] lines) {
+        for (int i = 0; i < lines.length; i++) {
+            if (lines[i].trim().length() != 0) {
+                graphLines.add(lines[i]);
+            }
         }
     }
-
 }

@@ -29,8 +29,8 @@ public class Protocol {
     public static final String HTTPS = "HTTPS";
     public static final String END_PROTOCOL = "End or Unknown Protocol";
 
-    public static Map<String, CustomAnalyzer> classTable;
-    public static Map<String, Integer> cellTable;
+    private static Map<String, CustomAnalyzer> classTable;
+    private static Map<String, Integer> cellTable;
 
     @Autowired
     private WebApplicationContext context;
@@ -39,7 +39,6 @@ public class Protocol {
         if (context == null) {
             System.out.println("null context received in Protocol init");
         }
-        System.out.println("Context is not null in Protocol init!!");
         classTable = new HashMap<String, CustomAnalyzer>();
         cellTable = new HashMap<String, Integer>();
         initDefaultClassTable();
@@ -50,7 +49,6 @@ public class Protocol {
         System.out.println("Creating beans with context in protocol!!");
         classTable.put(ETHERNET,
                 (EthernetAnalyzer) context.getBean(EthernetAnalyzer.class));
-        System.out.println("Stored ethernet bean in classtable!");
         classTable.put(IPV4,
                 (IPv4Analyzer) context.getBean(IPv4Analyzer.class));
         classTable.put(TCP, (TcpAnalyzer) context.getBean(TcpAnalyzer.class));
