@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Document(indexName = "credentials", type = "login")
+@Document(indexName = "protocol", type = "credentials")
 public class LoginInfoEntity {
 
     @Id

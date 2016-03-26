@@ -21,7 +21,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@Document(indexName = "packet", type = "packetId")
+@Document(indexName = "protocol", type = "packet")
 public class PacketIdEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id

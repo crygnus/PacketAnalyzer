@@ -11,6 +11,8 @@ import java.sql.Timestamp;
 import javax.persistence.Id;
 
 import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -22,12 +24,13 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@Document(indexName = "header", type = "link")
+@Document(indexName = "protocol", type = "link")
 public class LinkAnalyzerEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     private String id;
 
+    @Field(type = FieldType.Nested)
     private PacketIdEntity packetIdEntity;
 
     private Timestamp timestamp;
