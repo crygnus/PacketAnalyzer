@@ -12,15 +12,6 @@
 			http://www.springframework.org/schema/aop 
 			http://www.springframework.org/schema/aop/spring-aop.xsd">
 
-	<bean id="propertyConfigurer"
-		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="locations">
-			<list>
-				<!-- PROTOCOL_PROPERTY_FILE is taken from the tomcat environment -->
-				<value>file:${PROTOCOL_PROPERTY_FILE}</value>
-			</list>
-		</property>
-	</bean>
 
 	<!-- Scan package for @Component, @Service and @Repository annotations which 
 		can be @Autowired later on -->
