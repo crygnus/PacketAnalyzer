@@ -15,11 +15,12 @@ import org.springframework.stereotype.Component;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
+import in.ac.bits.protocolanalyzer.analyzer.CustomAnalyzer;
 import in.ac.bits.protocolanalyzer.analyzer.PacketWrapper;
-import in.ac.bits.protocolanalyzer.analyzer.Protocol;
 import in.ac.bits.protocolanalyzer.analyzer.event.PacketTypeDetectionEvent;
 import in.ac.bits.protocolanalyzer.persistence.entity.EthernetEntity;
 import in.ac.bits.protocolanalyzer.persistence.repository.EthernetRepository;
+import in.ac.bits.protocolanalyzer.protocol.Protocol;
 
 /**
  *
@@ -27,7 +28,7 @@ import in.ac.bits.protocolanalyzer.persistence.repository.EthernetRepository;
  */
 
 @Component
-public class EthernetAnalyzer {
+public class EthernetAnalyzer implements CustomAnalyzer {
 
     private static final String PACKET_TYPE_OF_RELEVANCE = Protocol.ETHERNET;
 
@@ -39,13 +40,8 @@ public class EthernetAnalyzer {
     private byte[] ethernetHeader;
     private int startByte;
     private int endByte;
+    private static String conditionalHeaderField;
 
-    /**
-     * Constructs the object and registers itself on the eventbus of the
-     * corresponding cell
-     * 
-     * @param eventBus
-     */
     public void configure(EventBus eventBus) {
         this.eventBus = eventBus;
         this.eventBus.register(this);
@@ -88,25 +84,25 @@ public class EthernetAnalyzer {
                 EthernetHeader.HEADER_LENGTH_IN_BYTES + 1);
     }
 
-    private void setStartByte(PacketWrapper packetWrapper) {
+    public void setStartByte(PacketWrapper packetWrapper) {
         this.startByte = packetWrapper.getStartByte()
                 + EthernetHeader.HEADER_LENGTH_IN_BYTES;
     }
 
-    private void setEndByte(PacketWrapper packetWrapper) {
+    public void setEndByte(PacketWrapper packetWrapper) {
         /* Account for last 4 bytes of trailer */
         this.endByte = packetWrapper.getEndByte() - 4;
     }
 
     @Subscribe
-    public void analyzePacket(PacketWrapper packetWrapper) {
+    public void analyze(PacketWrapper packetWrapper) {
         if (PACKET_TYPE_OF_RELEVANCE
                 .equalsIgnoreCase(packetWrapper.getPacketType())) {
 
             /* Set ethernet header */
             setEthernetHeader(packetWrapper);
             /* Do type detection first and publish the event */
-            String nextPacketType = setNextPacketType(packetWrapper);
+            String nextPacketType = setNextProtocolType();
             setStartByte(packetWrapper);
             setEndByte(packetWrapper);
             publishTypeDetectionEvent(nextPacketType, startByte, endByte);
@@ -124,7 +120,7 @@ public class EthernetAnalyzer {
 
     }
 
-    private String setNextPacketType(PacketWrapper packetWrapper) {
+    public String setNextProtocolType() {
 
         String nextHeaderTypeHex = getEtherType(this.ethernetHeader);
 
@@ -140,9 +136,15 @@ public class EthernetAnalyzer {
 
     }
 
-    private void publishTypeDetectionEvent(String nextPacketType, int startByte,
+    public void publishTypeDetectionEvent(String nextPacketType, int startByte,
             int endByte) {
         this.eventBus.post(new PacketTypeDetectionEvent(nextPacketType,
                 startByte, endByte));
+    }
+
+    @Override
+    public void setConditionHeader(String headerName) {
+        EthernetHeader.addHeaderField(headerName.toUpperCase());
+
     }
 }
