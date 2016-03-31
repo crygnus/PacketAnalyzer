@@ -12,6 +12,8 @@ import com.google.common.eventbus.EventBus;
 
 import in.ac.bits.protocolanalyzer.analyzer.GenericAnalyzer;
 import in.ac.bits.protocolanalyzer.analyzer.PacketWrapper;
+import in.ac.bits.protocolanalyzer.analyzer.event.EndAnalysisEvent;
+import in.ac.bits.protocolanalyzer.analyzer.event.PacketProcessEndEvent;
 import in.ac.bits.protocolanalyzer.persistence.entity.TransportAnalyzerEntity;
 import in.ac.bits.protocolanalyzer.persistence.repository.TransportAnalyzerRepository;
 
@@ -44,10 +46,14 @@ public class TransportAnalyzer implements GenericAnalyzer {
         // analyze and pass to hooks
         TransportAnalyzerEntity tae = new TransportAnalyzerEntity();
         tae.setPacketIdEntity(packetWrapper.getPacketIdEntity());
-        transportAnalyzerRepository.save(tae);
+        /* transportAnalyzerRepository.save(tae); */
 
         publishToEventBus(packetWrapper);
 
+    }
+
+    public void end() {
+        transportEventBus.post(new PacketProcessEndEvent());
     }
 
 }

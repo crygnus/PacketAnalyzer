@@ -34,6 +34,9 @@ public class Session {
     private PcapAnalyzer pcapAnalyzer;
 
     @Autowired
+    private TimedStorage timedStorage;
+
+    @Autowired
     private AnalyzerCell linkCell;
     @Autowired
     private LinkAnalyzer linkAnalyzer;
@@ -52,8 +55,12 @@ public class Session {
     private EventBusFactory factory;
 
     @Autowired
-    Protocol protocol;
+    private Protocol protocol;
 
+    private long packetProcessedCount = 0;
+    private long packetReadCount = 0;
+
+    private ExecutorService executorService;
     private String sessionName;
     private Map<Integer, AnalyzerCell> cellMap;
 
@@ -70,35 +77,35 @@ public class Session {
     }
 
     public long startExperiment() {
-        ExecutorService executorService = Executors.newFixedThreadPool(5);
+        executorService = Executors.newFixedThreadPool(5);
         executorService.execute(linkCell);
         executorService.execute(networkCell);
         executorService.execute(transportCell);
-        return pcapAnalyzer.readFile();
+        this.packetReadCount = pcapAnalyzer.readFile();
+        if (packetReadCount == packetProcessedCount) {
+            endSession();
+        }
+        return packetReadCount;
     }
 
     public void attachCustomAnalyzer(int cellNumber,
             CustomAnalyzer customAnalyzer) {
-        System.out.println("Attaching custom analyzer in session!!");
         AnalyzerCell cell = cellMap.get(cellNumber);
-        System.out.println("Cell got from local map = " + cell.getCellID());
         cell.addCustomAnalyzer(customAnalyzer);
-        System.out.println("Added custom analyzer in cell");
     }
 
     public void setLinkCell() {
-        linkCell.configure(sessionName, "linkCell", linkAnalyzer);
+        linkCell.configure(this, "linkCell", linkAnalyzer);
         cellMap.put(1, linkCell);
     }
 
     private void setNetworkCell() {
-        networkCell.configure(sessionName, "networkCell", networkAnalyzer);
+        networkCell.configure(this, "networkCell", networkAnalyzer);
         cellMap.put(2, networkCell);
     }
 
     private void setTransportCell() {
-        transportCell.configure(sessionName, "transportCell",
-                transportAnalyzer);
+        transportCell.configure(this, "transportCell", transportAnalyzer);
         cellMap.put(3, transportCell);
     }
 
@@ -106,25 +113,28 @@ public class Session {
         for (Entry<String, Set<String>> node : protocolGraph.entrySet()) {
             AnalyzerCell cell = cellMap
                     .get(protocol.getCellNumber(node.getKey()));
-            System.out.println(
-                    "Analyzer cell to be configured = " + cell.getCellID());
             Set<String> toNodes = node.getValue();
             for (String protocolNode : toNodes) {
-                System.out.println(
-                        "Protocol name received for attaching to cell ="
-                                + protocolNode);
                 AnalyzerCell destinationCell = cellMap
                         .get(protocol.getCellNumber(protocolNode));
-                System.out.println("Destination cell to be saved = "
-                        + destinationCell.getCellID());
                 cell.configureDestinationStageMap(protocolNode,
                         destinationCell);
             }
         }
     }
 
+    public void incrementPacketProcessedCount() {
+        this.packetProcessedCount++;
+        if (packetReadCount == packetProcessedCount) {
+            endSession();
+        }
+    }
+
     public void endSession() {
+        System.out.println("Ending session...");
         factory.getEventBus(CONTROLLER_BUS).post(new EndAnalysisEvent());
+        executorService.shutdown();
+        System.out.println("Session ended!");
     }
 
     public String getSessionName() {

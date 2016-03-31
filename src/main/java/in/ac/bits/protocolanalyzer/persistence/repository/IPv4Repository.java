@@ -1,6 +1,6 @@
 package in.ac.bits.protocolanalyzer.persistence.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 import in.ac.bits.protocolanalyzer.persistence.entity.IPv4Entity;
 import in.ac.bits.protocolanalyzer.persistence.entity.PacketIdEntity;
@@ -11,7 +11,8 @@ import in.ac.bits.protocolanalyzer.persistence.entity.PacketIdEntity;
  * @author crygnus
  *
  */
-public interface IPv4Repository extends JpaRepository<IPv4Entity, Long> {
+public interface IPv4Repository
+        extends ElasticsearchRepository<IPv4Entity, String> {
 
     /**
      * Finds IPv4Entity corresponding to {@link PacketIdEntity} given.

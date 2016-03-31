@@ -7,19 +7,12 @@ package in.ac.bits.protocolanalyzer.persistence.entity;
 
 import java.io.Serializable;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 
-import lombok.EqualsAndHashCode;
+import org.springframework.data.elasticsearch.annotations.Document;
+
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 /**
  *
@@ -28,19 +21,12 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-@EqualsAndHashCode
-@ToString
-@Entity
-@Table(name = "packet_id")
+@Document(indexName = "protocol", type = "packet")
 public class PacketIdEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "packet_id_seq")
-    @SequenceGenerator(name = "packet_id_seq", sequenceName = "PACKET_ID_SEQ")
-    private Long id;
+    private String id;
 
-    @Column(name = "packet_id", columnDefinition = "serial")
-    @Basic
     private long packetId;
 
 }
