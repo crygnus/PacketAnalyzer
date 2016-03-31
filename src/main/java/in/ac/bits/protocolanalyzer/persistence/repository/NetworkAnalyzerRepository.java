@@ -8,7 +8,6 @@ package in.ac.bits.protocolanalyzer.persistence.repository;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 import in.ac.bits.protocolanalyzer.persistence.entity.NetworkAnalyzerEntity;
-import in.ac.bits.protocolanalyzer.persistence.entity.PacketIdEntity;
 
 /**
  *
@@ -17,7 +16,6 @@ import in.ac.bits.protocolanalyzer.persistence.entity.PacketIdEntity;
 public interface NetworkAnalyzerRepository
         extends ElasticsearchRepository<NetworkAnalyzerEntity, String> {
 
-    public NetworkAnalyzerEntity findByPacketIdEntity(
-            PacketIdEntity packetIdEntity);
+    public NetworkAnalyzerEntity findByPacketId(long packetId);
 
 }

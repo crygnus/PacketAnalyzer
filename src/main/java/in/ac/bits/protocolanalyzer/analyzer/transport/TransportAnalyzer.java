@@ -45,7 +45,7 @@ public class TransportAnalyzer implements GenericAnalyzer {
 
         // analyze and pass to hooks
         TransportAnalyzerEntity tae = new TransportAnalyzerEntity();
-        tae.setPacketIdEntity(packetWrapper.getPacketIdEntity());
+        tae.setPacketId(packetWrapper.getPacketId());
         /* transportAnalyzerRepository.save(tae); */
 
         publishToEventBus(packetWrapper);

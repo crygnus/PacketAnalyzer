@@ -29,8 +29,7 @@ public class EthernetEntity extends MasterEntity implements Serializable {
     @Id
     private String id;
 
-    @Field(type = FieldType.Nested)
-    private PacketIdEntity packetIdEntity;
+    private long packetId;
 
     private String sourceAddr;
 

@@ -29,7 +29,6 @@ public class TransportAnalyzerEntity implements Serializable {
     @Id
     private String id;
 
-    @Field(type = FieldType.Nested)
-    private PacketIdEntity packetIdEntity;
+    private long packetId;
 
 }

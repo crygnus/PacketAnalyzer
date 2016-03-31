@@ -242,7 +242,7 @@ public class TcpAnalyzer implements CustomAnalyzer {
             entity.setUrgentPointer(getUrgentPointer(tcpHeader));
             entity.setNextProtocol(nextProtocol);
 
-            entity.setPacketIdEntity(packetWrapper.getPacketIdEntity());
+            entity.setPacketId(packetWrapper.getPacketId());
 
             entities.add(entity);
         }

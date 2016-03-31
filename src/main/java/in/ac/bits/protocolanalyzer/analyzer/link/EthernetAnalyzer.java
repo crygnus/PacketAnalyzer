@@ -11,8 +11,13 @@ import java.util.List;
 import java.util.Timer;
 
 import org.apache.commons.codec.binary.Hex;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.client.Client;
 import org.pcap4j.packet.Packet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.core.query.IndexQuery;
+import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.stereotype.Component;
 
 import com.google.common.eventbus.EventBus;
@@ -20,7 +25,6 @@ import com.google.common.eventbus.Subscribe;
 
 import in.ac.bits.protocolanalyzer.analyzer.CustomAnalyzer;
 import in.ac.bits.protocolanalyzer.analyzer.PacketWrapper;
-import in.ac.bits.protocolanalyzer.analyzer.event.EndAnalysisEvent;
 import in.ac.bits.protocolanalyzer.analyzer.event.PacketProcessEndEvent;
 import in.ac.bits.protocolanalyzer.analyzer.event.PacketTypeDetectionEvent;
 import in.ac.bits.protocolanalyzer.persistence.entity.EthernetEntity;
@@ -40,9 +44,16 @@ public class EthernetAnalyzer implements CustomAnalyzer {
     @Autowired
     private EthernetRepository ethernetRepository;
 
+    @Autowired
+    private ElasticsearchTemplate template;
+
+    @Autowired
+    private Client client;
+
     private EventBus eventBus;
-    
+
     private List<EthernetEntity> entities;
+    private List<IndexQuery> queries;
     private Timer saveTimer;
 
     private byte[] ethernetHeader;
@@ -53,7 +64,8 @@ public class EthernetAnalyzer implements CustomAnalyzer {
     public void configure(EventBus eventBus) {
         this.eventBus = eventBus;
         this.eventBus.register(this);
-        this.entities = new ArrayList<EthernetEntity>();
+        /* this.entities = new ArrayList<EthernetEntity>(); */
+        this.queries = new ArrayList<IndexQuery>();
     }
 
     /* Field extraction methods - Start */
@@ -123,16 +135,24 @@ public class EthernetAnalyzer implements CustomAnalyzer {
             entity.setSourceAddr(getSource(ethernetHeader));
             entity.setDstAddr(getDestination(ethernetHeader));
             entity.setEtherType(nextPacketType);
-            entity.setPacketIdEntity(packetWrapper.getPacketIdEntity());
-            entities.add(entity);
+            entity.setPacketId(packetWrapper.getPacketId());
+            /* entities.add(entity); */
             /* timedStorage.saveEntities(EthernetRepository.class, entity); */
+            IndexQuery query = new IndexQuery();
+            query.setObject(entity);
+            queries.add(query);
+
         }
 
     }
 
     @Subscribe
     public void save(PacketProcessEndEvent event) {
-        ethernetRepository.save(entities);
+        if (template == null) {
+            System.out.println("Template is null!!!");
+        }
+        template.bulkIndex(queries);
+        /* ethernetRepository.save(entities); */
         System.out.println("Ethernetentities saved!!");
     }
 

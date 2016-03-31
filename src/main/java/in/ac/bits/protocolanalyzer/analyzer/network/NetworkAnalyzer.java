@@ -44,7 +44,7 @@ public class NetworkAnalyzer implements GenericAnalyzer {
 
         // analyze and pass to hooks
         NetworkAnalyzerEntity nae = new NetworkAnalyzerEntity();
-        nae.setPacketIdEntity(packetWrapper.getPacketIdEntity());
+        nae.setPacketId(packetWrapper.getPacketId());
         /*networkAnalyzerRepository.save(nae);*/
 
         publishToEventBus(packetWrapper);

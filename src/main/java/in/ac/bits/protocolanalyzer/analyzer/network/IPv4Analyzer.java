@@ -179,7 +179,7 @@ public class IPv4Analyzer implements CustomAnalyzer {
              */
             IPv4Entity entity = new IPv4Entity();
 
-            entity.setPacketIdEntity(packetWrapper.getPacketIdEntity());
+            entity.setPacketId(packetWrapper.getPacketId());
             entity.setVersion(IPv4Header.IP_VERSION);
             entity.setIhl(getIhl(ipv4Header));
             entity.setTotalLength(getTotalLength(ipv4Header));

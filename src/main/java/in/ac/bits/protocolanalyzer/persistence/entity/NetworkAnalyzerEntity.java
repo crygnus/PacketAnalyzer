@@ -10,8 +10,6 @@ import java.io.Serializable;
 import javax.persistence.Id;
 
 import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -29,7 +27,6 @@ public class NetworkAnalyzerEntity implements Serializable {
     @Id
     private String id;
 
-    @Field(type = FieldType.Nested)
-    private PacketIdEntity packetIdEntity;
+    private long packetId;
 
 }

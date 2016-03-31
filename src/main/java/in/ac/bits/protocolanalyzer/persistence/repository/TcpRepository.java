@@ -2,7 +2,6 @@ package in.ac.bits.protocolanalyzer.persistence.repository;
 
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
-import in.ac.bits.protocolanalyzer.persistence.entity.PacketIdEntity;
 import in.ac.bits.protocolanalyzer.persistence.entity.TcpEntity;
 
 /**
@@ -20,6 +19,6 @@ public interface TcpRepository
      * @param packetIdEntity
      * @return {@link TcpEntity}
      */
-    public TcpEntity findByPacketIdEntity(PacketIdEntity packetIdEntity);
+    public TcpEntity findByPacketId(long packetId);
 
 }

@@ -43,7 +43,7 @@ public class LinkAnalyzer implements GenericAnalyzer {
     public void analyzePacket(PacketWrapper packetWrapper) {
 
         LinkAnalyzerEntity lae = new LinkAnalyzerEntity();
-        lae.setPacketIdEntity(packetWrapper.getPacketIdEntity());
+        lae.setPacketId(packetWrapper.getPacketId());
         lae.setTimestamp(packetWrapper.getPacketTimestamp());
         /*linkAnalyzerRepository.save(lae);*/
 
