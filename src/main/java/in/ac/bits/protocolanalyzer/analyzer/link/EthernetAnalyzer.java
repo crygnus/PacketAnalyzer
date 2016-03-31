@@ -5,7 +5,10 @@
  */
 package in.ac.bits.protocolanalyzer.analyzer.link;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Timer;
 
 import org.apache.commons.codec.binary.Hex;
 import org.pcap4j.packet.Packet;
@@ -17,6 +20,8 @@ import com.google.common.eventbus.Subscribe;
 
 import in.ac.bits.protocolanalyzer.analyzer.CustomAnalyzer;
 import in.ac.bits.protocolanalyzer.analyzer.PacketWrapper;
+import in.ac.bits.protocolanalyzer.analyzer.event.EndAnalysisEvent;
+import in.ac.bits.protocolanalyzer.analyzer.event.PacketProcessEndEvent;
 import in.ac.bits.protocolanalyzer.analyzer.event.PacketTypeDetectionEvent;
 import in.ac.bits.protocolanalyzer.persistence.entity.EthernetEntity;
 import in.ac.bits.protocolanalyzer.persistence.repository.EthernetRepository;
@@ -36,6 +41,9 @@ public class EthernetAnalyzer implements CustomAnalyzer {
     private EthernetRepository ethernetRepository;
 
     private EventBus eventBus;
+    
+    private List<EthernetEntity> entities;
+    private Timer saveTimer;
 
     private byte[] ethernetHeader;
     private int startByte;
@@ -45,6 +53,7 @@ public class EthernetAnalyzer implements CustomAnalyzer {
     public void configure(EventBus eventBus) {
         this.eventBus = eventBus;
         this.eventBus.register(this);
+        this.entities = new ArrayList<EthernetEntity>();
     }
 
     /* Field extraction methods - Start */
@@ -115,9 +124,16 @@ public class EthernetAnalyzer implements CustomAnalyzer {
             entity.setDstAddr(getDestination(ethernetHeader));
             entity.setEtherType(nextPacketType);
             entity.setPacketIdEntity(packetWrapper.getPacketIdEntity());
-            ethernetRepository.save(entity);
+            entities.add(entity);
+            /* timedStorage.saveEntities(EthernetRepository.class, entity); */
         }
 
+    }
+
+    @Subscribe
+    public void save(PacketProcessEndEvent event) {
+        ethernetRepository.save(entities);
+        System.out.println("Ethernetentities saved!!");
     }
 
     public String setNextProtocolType() {

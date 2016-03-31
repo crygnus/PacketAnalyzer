@@ -6,7 +6,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -33,6 +32,9 @@ public class Session {
 
     @Autowired
     private PcapAnalyzer pcapAnalyzer;
+
+    @Autowired
+    private TimedStorage timedStorage;
 
     @Autowired
     private AnalyzerCell linkCell;

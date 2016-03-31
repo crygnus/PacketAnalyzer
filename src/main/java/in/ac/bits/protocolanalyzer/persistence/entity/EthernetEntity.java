@@ -22,7 +22,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Document(indexName = "protocol", type = "ethernet")
-public class EthernetEntity implements Serializable {
+public class EthernetEntity extends MasterEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
