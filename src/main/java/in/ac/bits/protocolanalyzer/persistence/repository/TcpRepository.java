@@ -1,6 +1,6 @@
 package in.ac.bits.protocolanalyzer.persistence.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 import in.ac.bits.protocolanalyzer.persistence.entity.PacketIdEntity;
 import in.ac.bits.protocolanalyzer.persistence.entity.TcpEntity;
@@ -11,7 +11,8 @@ import in.ac.bits.protocolanalyzer.persistence.entity.TcpEntity;
  * @author crygnus
  *
  */
-public interface TcpRepository extends JpaRepository<TcpEntity, Long> {
+public interface TcpRepository
+        extends ElasticsearchRepository<TcpEntity, String> {
 
     /**
      * Finds TcpEntity corresponding to {@link PacketIdEntity} given.

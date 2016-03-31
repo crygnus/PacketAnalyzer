@@ -5,8 +5,7 @@
  */
 package in.ac.bits.protocolanalyzer.persistence.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 import in.ac.bits.protocolanalyzer.persistence.entity.PacketIdEntity;
 
@@ -14,9 +13,7 @@ import in.ac.bits.protocolanalyzer.persistence.entity.PacketIdEntity;
  *
  * @author amit
  */
-public interface PacketIdRepository extends JpaRepository<PacketIdEntity, Long> {
-
-    @Query(nativeQuery = true, value = "SELECT last_value FROM packet_id_packet_id_seq")
-    public long findSequenceValue();
+public interface PacketIdRepository
+        extends ElasticsearchRepository<PacketIdEntity, String> {
 
 }

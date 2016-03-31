@@ -33,7 +33,7 @@ public class IPv4Analyzer implements CustomAnalyzer {
     public static final String PACKET_TYPE_OF_RELEVANCE = Protocol.IPV4;
 
     @Autowired
-    private IPv4Repository ipPv4Repository;
+    private IPv4Repository ipv4Repository;
 
     private EventBus eventBus;
 
@@ -193,7 +193,7 @@ public class IPv4Analyzer implements CustomAnalyzer {
             entity.setSourceAddr(this.getSouceAddress(ipv4Header));
             entity.setDestinationAddr(this.getDestinationAddress(ipv4Header));
 
-            ipPv4Repository.save(entity);
+            ipv4Repository.save(entity);
         }
     }
 
