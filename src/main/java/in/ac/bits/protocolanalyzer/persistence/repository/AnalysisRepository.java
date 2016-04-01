@@ -25,6 +25,7 @@ public class AnalysisRepository {
     private Timer killTimer;
     
     private boolean pullStopped = false;
+    private int bucketCapacity = 10000;
 
     public void configure() {
         this.queries = new ConcurrentLinkedQueue<IndexQuery>();
@@ -61,18 +62,19 @@ public class AnalysisRepository {
                 }
             }
         };
-        saveTimer.schedule(save, 100, 100);
+        saveTimer.schedule(save, 100, 200);
 
         TimerTask pull = new TimerTask() {
 
             @Override
             public void run() {
                 while (!queries.isEmpty()) {
+                    pullStopped = false;
                     ArrayList<IndexQuery> bucket = new ArrayList<IndexQuery>();
                     buckets.add(bucket);
                     /*System.out.println(
                             "Adding bucket number - " + buckets.size());*/
-                    for (int i = 0; i < 1000; i++) {
+                    for (int i = 0; i < 10000; i++) {
                         if(queries.isEmpty()) {
                             pullStopped = true;
                             break;
@@ -83,7 +85,7 @@ public class AnalysisRepository {
                 }
             }
         };
-        pullTimer.schedule(pull, 20, 100);
+        pullTimer.schedule(pull, 20, 200);
     }
 
     public void terminate() {
