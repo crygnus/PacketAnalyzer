@@ -7,12 +7,11 @@ package in.ac.bits.protocolanalyzer.analyzer.link;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Timer;
 
 import org.apache.commons.codec.binary.Hex;
 import org.pcap4j.packet.Packet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.stereotype.Component;
 
 import com.google.common.eventbus.EventBus;
@@ -20,11 +19,9 @@ import com.google.common.eventbus.Subscribe;
 
 import in.ac.bits.protocolanalyzer.analyzer.CustomAnalyzer;
 import in.ac.bits.protocolanalyzer.analyzer.PacketWrapper;
-import in.ac.bits.protocolanalyzer.analyzer.event.EndAnalysisEvent;
-import in.ac.bits.protocolanalyzer.analyzer.event.PacketProcessEndEvent;
 import in.ac.bits.protocolanalyzer.analyzer.event.PacketTypeDetectionEvent;
 import in.ac.bits.protocolanalyzer.persistence.entity.EthernetEntity;
-import in.ac.bits.protocolanalyzer.persistence.repository.EthernetRepository;
+import in.ac.bits.protocolanalyzer.persistence.repository.AnalysisRepository;
 import in.ac.bits.protocolanalyzer.protocol.Protocol;
 
 /**
@@ -38,22 +35,17 @@ public class EthernetAnalyzer implements CustomAnalyzer {
     private static final String PACKET_TYPE_OF_RELEVANCE = Protocol.ETHERNET;
 
     @Autowired
-    private EthernetRepository ethernetRepository;
+    private AnalysisRepository repository;
 
     private EventBus eventBus;
-    
-    private List<EthernetEntity> entities;
-    private Timer saveTimer;
 
     private byte[] ethernetHeader;
     private int startByte;
     private int endByte;
-    private static String conditionalHeaderField;
 
     public void configure(EventBus eventBus) {
         this.eventBus = eventBus;
         this.eventBus.register(this);
-        this.entities = new ArrayList<EthernetEntity>();
     }
 
     /* Field extraction methods - Start */
@@ -123,17 +115,14 @@ public class EthernetAnalyzer implements CustomAnalyzer {
             entity.setSourceAddr(getSource(ethernetHeader));
             entity.setDstAddr(getDestination(ethernetHeader));
             entity.setEtherType(nextPacketType);
-            entity.setPacketIdEntity(packetWrapper.getPacketIdEntity());
-            entities.add(entity);
-            /* timedStorage.saveEntities(EthernetRepository.class, entity); */
+            entity.setPacketId(packetWrapper.getPacketId());
+
+            IndexQuery query = new IndexQuery();
+            query.setObject(entity);
+            repository.save(query);
+
         }
 
-    }
-
-    @Subscribe
-    public void save(PacketProcessEndEvent event) {
-        ethernetRepository.save(entities);
-        System.out.println("Ethernetentities saved!!");
     }
 
     public String setNextProtocolType() {

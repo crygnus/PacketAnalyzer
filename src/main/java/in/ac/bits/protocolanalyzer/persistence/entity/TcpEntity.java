@@ -1,12 +1,6 @@
 package in.ac.bits.protocolanalyzer.persistence.entity;
 
-import java.io.Serializable;
-
-import javax.persistence.Id;
-
 import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -20,16 +14,10 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@Document(indexName = "protocol", type = "tcp")
-public class TcpEntity implements Serializable {
+@Document(indexName = "protocol", type = "tcp", shards=1, replicas=0)
+public class TcpEntity {
 
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    private String id;
-
-    @Field(type = FieldType.Nested)
-    private PacketIdEntity packetIdEntity;
+    private long packetId;
 
     private int sourcePort;
 

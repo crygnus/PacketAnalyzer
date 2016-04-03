@@ -5,14 +5,9 @@
  */
 package in.ac.bits.protocolanalyzer.persistence.entity;
 
-import java.io.Serializable;
 import java.sql.Timestamp;
 
-import javax.persistence.Id;
-
 import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -24,14 +19,10 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@Document(indexName = "protocol", type = "link")
-public class LinkAnalyzerEntity implements Serializable {
-    private static final long serialVersionUID = 1L;
-    @Id
-    private String id;
+@Document(indexName = "protocol", type = "link", shards=1, replicas=0)
+public class LinkAnalyzerEntity {
 
-    @Field(type = FieldType.Nested)
-    private PacketIdEntity packetIdEntity;
+    private long packetId;
 
     private Timestamp timestamp;
 

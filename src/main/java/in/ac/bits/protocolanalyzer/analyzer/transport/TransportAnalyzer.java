@@ -5,17 +5,13 @@
  */
 package in.ac.bits.protocolanalyzer.analyzer.transport;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.eventbus.EventBus;
 
 import in.ac.bits.protocolanalyzer.analyzer.GenericAnalyzer;
 import in.ac.bits.protocolanalyzer.analyzer.PacketWrapper;
-import in.ac.bits.protocolanalyzer.analyzer.event.EndAnalysisEvent;
-import in.ac.bits.protocolanalyzer.analyzer.event.PacketProcessEndEvent;
 import in.ac.bits.protocolanalyzer.persistence.entity.TransportAnalyzerEntity;
-import in.ac.bits.protocolanalyzer.persistence.repository.TransportAnalyzerRepository;
 
 /**
  *
@@ -26,9 +22,6 @@ import in.ac.bits.protocolanalyzer.persistence.repository.TransportAnalyzerRepos
 
 @Component
 public class TransportAnalyzer implements GenericAnalyzer {
-
-    @Autowired
-    private TransportAnalyzerRepository transportAnalyzerRepository;
 
     private EventBus transportEventBus;
 
@@ -45,15 +38,10 @@ public class TransportAnalyzer implements GenericAnalyzer {
 
         // analyze and pass to hooks
         TransportAnalyzerEntity tae = new TransportAnalyzerEntity();
-        tae.setPacketIdEntity(packetWrapper.getPacketIdEntity());
-        /* transportAnalyzerRepository.save(tae); */
+        tae.setPacketId(packetWrapper.getPacketId());
 
         publishToEventBus(packetWrapper);
 
-    }
-
-    public void end() {
-        transportEventBus.post(new PacketProcessEndEvent());
     }
 
 }
