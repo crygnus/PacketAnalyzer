@@ -5,6 +5,8 @@
  */
 package in.ac.bits.protocolanalyzer.mvc.controller;
 
+import java.util.Random;
+
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,6 +18,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import in.ac.bits.protocolanalyzer.analyzer.Session;
 import in.ac.bits.protocolanalyzer.protocol.Protocol;
+import in.ac.bits.protocolanalyzer.protocol.ProtocolChecker;
 import in.ac.bits.protocolanalyzer.protocol.ProtocolGraphParser;
 
 /**
@@ -35,6 +38,9 @@ public class SessionController {
 
     @Autowired
     private Protocol protocol;
+
+    @Autowired
+    private ProtocolChecker checker;
 
     @RequestMapping(value = "/analysis", method = RequestMethod.GET)
     public @ResponseBody String analyze(
@@ -60,9 +66,11 @@ public class SessionController {
      */
     private void init() {
         this.session = context.getBean(Session.class);
-        session.init("session_name");
+        Random rand = new Random();
+        session.init("session_name_" + rand.nextInt());
         System.out.println("Session init complete!!");
         protocol.init();
+        checker.checkNAdd();
         System.out.println(
                 "Successfully completed init method in session controller!!");
     }
