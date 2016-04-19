@@ -9,7 +9,7 @@ window.AnalysisView = Backbone.View.extend({
 		initialize: function () {
 
 		},
-		populateTable: function(){ 
+		populate: function(){ 
 			//var numberOfColumns = document.getElementById("packetInfo").rows[0].cells.length;
 			/*var table = document.getElementById("packetInfo").getElementsByTagName('tbody')[0];
 			var row = table.insertRow(table.rows.length);
