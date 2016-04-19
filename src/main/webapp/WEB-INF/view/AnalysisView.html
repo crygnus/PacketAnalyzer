@@ -1,4 +1,4 @@
-    <nav class="navbar navbar-inverse navbar-fixed-top">
+ <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -16,7 +16,7 @@
             <li><a id="logout">Logout</a></li>
           </ul>
           <form>
-        </div>
+          </form></div>
       </div>
     </nav>
 
@@ -26,28 +26,115 @@
           <ul class="nav nav-sidebar">
             <li class="active"><a href="#">VIEWS<span class="sr-only">(current)</span></a></li>
             <li><a id="tabularView">Tabular</a></li>
-            <li><a id"pieView">Pie</a></li>
+            <li><a id="pieView">Pie</a></li>
+            <li><a id="populate">Populate Table</a></li>
           </ul>
         </div>
-        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-          <h1 class="page-header">Stored Packets Analysis</h1>
-
-          <h2 class="sub-header">Packet Attributes</h2>
-          <div class="table-responsive">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Packet ID</th>
-                  <th>Source MAC</th>
-                  <th>Destination MAC</th>
-                  <th>Source IP</th>
-                  <th>Destination IP</th>
-                  <th>Header Length</th>
-                  <th>Packet Length</th>
-                </tr>
-              </thead>
-            </table>
+        <div id="splitView" class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <div id="upperHalf" class="scroll">
+            <h1 class="page-header">Stored Packets Analysis</h1>
+            <h2 class="sub-header">Packet Attributes</h2>
+            <div class="table-responsive">
+              <table id="packetInfo" class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Packet ID</th>
+                    <th>Source MAC</th>
+                    <th>Destination MAC</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
     </div>
+<footer class="footer navbar-fixed-bottom">
+  <div id="lowerHalf" class="scroll" style="border:1px solid gray">
+    Packet Information
+    <pre id="dataContainer">
+    </pre>
+  </div>
+</footer>
+    <!-- jquery probably already included so dont add this -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    <script>
+
+//REMOVE THIS DEFINITION WHEN USING THE GET DATA
+globalData = {
+  "took" : 3,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 5,
+    "successful" : 5,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : 428,
+    "max_score" : 1.0,
+    "hits" : [ {
+      "_index" : "protocol",
+      "_type" : "ethernet",
+      "_id" : "AVP1UU5uiBrCXxO0mlzp",
+      "_score" : 1.0,
+      "_hoho" : 3.0,
+      "_source":{"packetId":1,"sourceAddr":"00:0f:f8:ef:e9:40","dstAddr":"c0:38:96:23:73:35","etherType":"IPV4"}
+    }, {
+      "_index" : "protocol",
+      "_type" : "ethernet",
+      "_id" : "AVP1UU5uiBrCXxO0mlzu",
+      "_score" : 1.0,
+      "_hoho" : 2.0,
+      "_source":{"packetId":6,"sourceAddr":"e2:1e:f2:ef:e9:12","dstAddr":"10:a8:e6:22:53:fe","etherType":"IPV4"}
+    } ]
+  }
+};
+
+// YE SCRIPT BADI HAI MAST MAST
+
+function populateTable(){
+  rows = globalData["hits"]["hits"];
+  var td, tr;
+  $("#packetInfo tbody tr").remove(); //clean table
+  var tdata = $("#packetInfo tbody")
+  for(var row in rows){
+    var rowSource = rows[row]["_source"]
+    tr = $("<tr>");
+    //packetId
+    td = $("<td>").text(rowSource["packetId"]);
+    tr.append(td);
+    //Source MAC
+    td = $("<td>").text(rowSource["sourceAddr"]);
+    tr.append(td);
+
+    td = $("<td>").text(rowSource["dstAddr"]);
+    tr.append(td);
+
+    tdata.append(tr);
+
+  }
+
+  //update handlers
+  $("#packetInfo tbody tr").click( function(){
+    var ind = $(this).index();
+    //alert(ind);
+    botInfo = globalData["hits"]["hits"][ind];
+
+    stringToWrite =  "";
+    for(var key in botInfo){
+      stringToWrite+= key + ": " + JSON.stringify(botInfo[key]) + "\n";
+    }
+    $("#dataContainer").text(stringToWrite);
+  });
+}
+</script>
+<style>
+.halfScroll {
+  min-height: 50%;
+  overflow: scroll;
+}
+
+</style>
