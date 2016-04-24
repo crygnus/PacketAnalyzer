@@ -4,7 +4,7 @@ window.AnalysisView = Backbone.View.extend({
 		events: {
 			 'click #help' :'userHelpPage',
 			 'click #logout': 'userLogout',
-			 'click #populateTable': 'populate'
+			 'click #populateTable': 'populateTable'
 		},
 		initialize: function () {
 
@@ -24,8 +24,38 @@ window.AnalysisView = Backbone.View.extend({
 				changeText: 1, // if you dont want the button text to change, set this to 0
 				showText: 'View',// the button text to show when a div is closed
 				hideText: 'Hide' // the button text to show when a div is open
-			});*/
-			populateTable();
+			});
+			populateTable();*/
+		},
+		populateTable :function(){
+  			rows = globalData["hits"]["hits"];
+  			var td, tr;
+  			$("#packetInfo tbody tr").remove(); //clean table
+  			var tdata = $("#packetInfo tbody")
+  			for(var row in rows){
+    			var rowSource = rows[row]["_source"]
+    			tr = $("<tr>");
+    			//packetId
+    			td = $("<td>").text(rowSource["packetId"]);
+    			tr.append(td);
+    			//Source MAC
+    			td = $("<td>").text(rowSource["sourceAddr"]);
+    			tr.append(td);
+    			//Dest MAC
+    			td = $("<td>").text(rowSource["dstAddr"]);
+    			tr.append(td);
+				tdata.append(tr);
+  			}
+  			//update handlers
+  			$("#packetInfo tbody tr").click( function(){
+    			var ind = $(this).index();
+    			botInfo = globalData["hits"]["hits"][ind];
+    			stringToWrite =  "";
+    			for(var key in botInfo){
+      				stringToWrite+= key + ": " + JSON.stringify(botInfo[key]) + "\n";
+    			}
+    			$("#dataContainer").text(stringToWrite);
+  			});
 		},
 		userHelpPage : function(){
 			window.open("https://github.com/prasadtalasila/packetanalyzer",'_blank');

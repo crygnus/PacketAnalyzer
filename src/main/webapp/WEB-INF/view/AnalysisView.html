@@ -24,7 +24,7 @@
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
-            <li class="active"><a href="#">VIEWS<span class="sr-only">(current)</span></a></li>
+            <li class="active"><a id="views">VIEWS<span class="sr-only">(current)</span></a></li>
             <li><a id="tabularView">Tabular</a></li>
             <li><a id="pieView">Pie</a></li>
             <li><a id="populateTable">Populate Table</a></li>
@@ -59,9 +59,7 @@
     </pre>
   </div>
 </footer>
-    <!-- jquery probably already included so dont add this -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
-    <script>
+<script>
 
 //REMOVE THIS DEFINITION WHEN USING THE GET DATA
 globalData = {
@@ -97,49 +95,4 @@ globalData = {
     }]
   }
 };
-
-// YE SCRIPT BADI HAI MAST MAST
-
-function populateTable(){
-  rows = globalData["hits"]["hits"];
-  var td, tr;
-  $("#packetInfo tbody tr").remove(); //clean table
-  var tdata = $("#packetInfo tbody")
-  for(var row in rows){
-    var rowSource = rows[row]["_source"]
-    tr = $("<tr>");
-    //packetId
-    td = $("<td>").text(rowSource["packetId"]);
-    tr.append(td);
-    //Source MAC
-    td = $("<td>").text(rowSource["sourceAddr"]);
-    tr.append(td);
-
-    td = $("<td>").text(rowSource["dstAddr"]);
-    tr.append(td);
-
-    tdata.append(tr);
-
-  }
-
-  //update handlers
-  $("#packetInfo tbody tr").click( function(){
-    var ind = $(this).index();
-    //alert(ind);
-    botInfo = globalData["hits"]["hits"][ind];
-
-    stringToWrite =  "";
-    for(var key in botInfo){
-      stringToWrite+= key + ": " + JSON.stringify(botInfo[key]) + "\n";
-    }
-    $("#dataContainer").text(stringToWrite);
-  });
-}
 </script>
-<style>
-.halfScroll {
-  min-height: 50%;
-  overflow: scroll;
-}
-
-</style>

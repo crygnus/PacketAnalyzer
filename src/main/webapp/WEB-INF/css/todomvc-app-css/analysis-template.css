@@ -111,3 +111,7 @@ body {
   display:none;
     border:1px solid #333;
 }
+.halfScroll {
+  min-height: 50%;
+  overflow: scroll;
+}
