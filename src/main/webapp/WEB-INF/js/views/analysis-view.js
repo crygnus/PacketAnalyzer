@@ -28,9 +28,8 @@ window.AnalysisView = Backbone.View.extend({
 			populateTable();*/
 		},
 		populateTable :function(){
-
 			$.ajax({
-			url : 'http://localhost:9200/protocol_session_-577487249/ethernet/_search',
+			url : 'http://localhost:9200/protocol_session_-1958668037/ethernet/_search',
 			type : 'GET',
 			contentType : 'application/json; charset=utf-8',
 			dataType : 'text',
