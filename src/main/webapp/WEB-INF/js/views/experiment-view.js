@@ -17,6 +17,7 @@ window.ExperimentView = Backbone.View.extend({
         		experimenter : $('#experimenter').val(),
         		pcapfiles : $('#pcapPath').val()
         	};
+            sessionStorage.setItem('pcapPath', $('#pcapPath').val());
             $.ajax({
             url:'/protocolanalyzer/sessioninfo',
              type:'POST',
@@ -62,6 +63,7 @@ window.ExperimentView = Backbone.View.extend({
             window.open("https://github.com/prasadtalasila/packetanalyzer",'_blank');
         },
         userLogout  : function(){
+            sessionStorage.clear();
             Cookies.remove('userName');
             Cookies.remove('userAuth');
             alert("You have been logged out. Please login to continue");

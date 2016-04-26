@@ -77,6 +77,7 @@ window.AnalysisView = Backbone.View.extend({
 			window.open("https://github.com/prasadtalasila/packetanalyzer",'_blank');
 		},
 		userLogout  : function(){
+      sessionStorage.clear();
 			Cookies.remove('userName');
 			Cookies.remove('userAuth');		
 			app.navigate("#",{trigger: true});
