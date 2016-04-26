@@ -15,7 +15,7 @@ window.ExperimentView = Backbone.View.extend({
         		experimentName : $('#experimentName').val(),
         		description : $('#description').val(),
         		experimenter : $('#experimenter').val(),
-        		pcapfiles : $('#pcapPath').val()
+        		pcapPath : $('#pcapPath').val()
         	};
             sessionStorage.setItem('pcapPath', $('#pcapPath').val());
             $.ajax({
