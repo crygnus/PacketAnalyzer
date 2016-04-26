@@ -54,6 +54,15 @@ window.AnalysisView = Backbone.View.extend({
     			tr.append(td);
 				tdata.append(tr);
   			}
+  			var defaultColor = $("#packetInfo tbody tr").css('background-color');
+  			//css highlights upon mouse enter
+  			$("#packetInfo tbody tr").mouseenter( function(){
+  				$(this).css("background-color" ,'rgb(100,149,237)');
+  			});
+  			//css highlights upon mouse leave
+  			$("#packetInfo tbody tr").mouseleave( function(){
+  				$(this).css("background-color" ,defaultColor);
+  			});
   			//update handlers
   			$("#packetInfo tbody tr").click( function(){
     			var ind = $(this).index();
@@ -62,7 +71,19 @@ window.AnalysisView = Backbone.View.extend({
     			for(var key in botInfo){
       				stringToWrite+= key + ": " + JSON.stringify(botInfo[key]) + "\n";
     			}
+    			$("#dataContainer").show();
     			$("#dataContainer").text(stringToWrite);
+  			});
+  			//mouseover should change the cursor back to s-resize
+  			$("#lowerHalf").mouseover( function() {
+  				if($("#dataContainer").is(":visible")) {
+  					$("#lowerHalf").css('cursor', 's-resize');
+  				}
+  			});
+  			//close data container
+  			$("#lowerHalf").click( function() {
+  				$("#dataContainer").hide();
+  				$("#lowerHalf").css('cursor', 'default');
   			});
 			},
 			error : function() {
