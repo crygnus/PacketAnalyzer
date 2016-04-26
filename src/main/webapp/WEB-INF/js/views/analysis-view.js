@@ -7,7 +7,7 @@ window.AnalysisView = Backbone.View.extend({
 			 'click #populateTable': 'populateTable'
 		},
 		initialize: function () {
-
+			this.delegateEvents();
 		},
 		populate: function(){ 
 			//var numberOfColumns = document.getElementById("packetInfo").rows[0].cells.length;
