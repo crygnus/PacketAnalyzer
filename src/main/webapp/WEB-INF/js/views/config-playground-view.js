@@ -30,18 +30,17 @@ window.ConfigPlaygroundView = Backbone.View.extend({
 	analysis : function(event){
 		event.preventDefault();
     _this = this;
-    debugger
     var pcapPath = sessionStorage.getItem('pcapPath');
     $.ajax({
       url:'/protocolanalyzer/session/analysis',
       type:'GET',
       contentType: 'application/json; charset=utf-8',
       dataType:'text',
-      data: { graph : _this.userParseGraph},
+      data: {pcapPath : pcapPath,graph : _this.userParseGraph},
       success:function (data) {
           var jsonData = JSON.parse(data);
-          var sessionNumber = jsonData.sessionNumber;
-          sessionStorage.setItem('sessionNumber',sessionNumber);
+          var sessionName = jsonData.sessionName;
+          sessionStorage.setItem('sessionName',sessionName);
           sessionStorage.setItem('layers',_this._layers);
           app.navigate("#/analysis",{trigger: true});
         },

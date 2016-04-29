@@ -10,8 +10,9 @@ window.AnalysisView = Backbone.View.extend({
 			this.delegateEvents();
 		},
 		populateTable :function(){
+      var sessionName = sessionStorage.getItem('sessionName');
 			$.ajax({
-			url : 'http://localhost:9200/protocol_session_1011452306/ethernet/_search',
+			url : 'http://localhost:9200/protocol_session_-1001725913/ethernet/_search',
 			type : 'GET',
 			contentType : 'application/json; charset=utf-8',
 			dataType : 'text',
