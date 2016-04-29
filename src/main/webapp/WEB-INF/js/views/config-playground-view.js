@@ -7,11 +7,12 @@ window.ConfigPlaygroundView = Backbone.View.extend({
     'click #analyzeBtn' : 'analysis',
     'click #validateBtn' : 'graphValidation'
 	},
-  userParseGraph: null,
 	initialize: function () {
 		this.delegateEvents();
+    this.userParseGraph = null;
+    this._layers = [];
 	},	
-  afterInitialize:function(){
+  disableAnalyzeButton:function(){
     document.getElementById('analyzeBtn').disabled = true; 
   },
 	userHelpPage : function(){
@@ -28,16 +29,19 @@ window.ConfigPlaygroundView = Backbone.View.extend({
 	},
 	analysis : function(event){
 		event.preventDefault();
+    _this = this;
     var pcapPath = sessionStorage.getItem('pcapPath');
     $.ajax({
       url:'/protocolanalyzer/session/analysis',
       type:'GET',
       contentType: 'application/json; charset=utf-8',
       dataType:'text',
-      data: { pcapPath:pcapPath ,graph : userParseGraph},
+      data: { graph : _this.userParseGraph},
       success:function (data) {
           var jsonData = JSON.parse(data);
           var sessionNumber = jsonData.sessionNumber;
+          sessionStorage.setItem('sessionNumber',sessionNumber);
+          sessionStorage.setItem('layers',_this._layers);
           app.navigate("#/analysis",{trigger: true});
         },
         error:function(){
@@ -83,7 +87,7 @@ window.ConfigPlaygroundView = Backbone.View.extend({
           var indexOfGraphElements=0;
           var mainCounter =0; //for seeing if graph has appropriate number of layer matches
 
-          var userParseGraph = e.target.result;
+          userParseGraph = e.target.result;
           var userParsing = userParseGraph.split(/[\{\};]/);
           for (var i = 0; i < userParsing.length; i++) {
             userParsing[i] = userParsing[i].trim();
@@ -96,33 +100,32 @@ window.ConfigPlaygroundView = Backbone.View.extend({
               mainCounter++;
             }  
           }
-          var layers = [];
           for (var k =0;k<indexOfGraphElements;k++){
-            layers[k] =  graphValues[k].split(' ')[1];
-            if(k===0 && layers[k] !=='start') {
+            _this._layers[k] =  graphValues[k].split(' ')[1];
+            if(k===0 && _this._layers[k] !=='start') {
               //start condition check
               flag++;
             }
-            if(k===(indexOfGraphElements-1) && layers[k]!=='end' ) { 
+            if(k===(indexOfGraphElements-1) && _this._layers[k]!=='end' ) { 
               //end condition check
               flag++; 
             }
           }  
           //trim results
-          for (var i = 0; i < layers.length; i++) {
-            layers[i] = layers[i].trim();
+          for (var i = 0; i < _this._layers.length; i++) {
+            _this._layers[i] = _this._layers[i].trim();
           }
           //start node check
-          if(userParsing[1] !== layers[1]){
+          if(userParsing[1] !== _this._layers[1]){
             flag++;
           }
-          //create map of next layers : key is current layer and values are all the possibilities for next layer
+          //create map of next _this._layers : key is current layer and values are all the possibilities for next layer
           var nextLayers={};
           var countCases =0;
           var countCases2=0;
           for(var i =0;i< userParsing.length;i++){
             if(userParsing[i].search('graph')===0){
-              nextLayers[layers[countCases-1]] = nextLayerList;
+              nextLayers[_this._layers[countCases-1]] = nextLayerList;
               var nextLayerList=[];
               countCases++;
               countCases2=0;
@@ -133,16 +136,16 @@ window.ConfigPlaygroundView = Backbone.View.extend({
               countCases2++;
             }
           }
-          // layers contains the list of layers possible for this experiment.
-          //nextLayers is a 2D array containing the next possible layers for each layer.
-          //checking valid next layers
+          // _this._layers contains the list of _this._layers possible for this experiment.
+          //nextLayers is a 2D array containing the next possible _this._layers for each layer.
+          //checking valid next _this._layers
           var matchOneLayerToNext =0;
-          for(var i=0;i < layers.length-1;i++){ 
+          for(var i=0;i < _this._layers.length-1;i++){ 
           //length-1 because the last layer will not have cases within it, even if it does, those are ignored
             for(key in nextLayers){
-              if(key===layers[i]){
+              if(key===_this._layers[i]){
                 var temp = i+1;
-                if(_this.isInArray(nextLayers[key],layers[temp])){
+                if(_this.isInArray(nextLayers[key],_this._layers[temp])){
                   matchOneLayerToNext++;
                 }  
               }
@@ -160,7 +163,6 @@ window.ConfigPlaygroundView = Backbone.View.extend({
           }
       }
       r.readAsText(f);
-     
     } else { 
       alert("Failed to load file");
     }
@@ -180,7 +182,7 @@ window.ConfigPlaygroundView = Backbone.View.extend({
   },
 	render: function () {
 		$(this.el).html(this.template());
-    $(document).ready(this.afterInitialize);
+    $(document).ready(this.disableAnalyzeButton);
 		return this;
 	}
 });
