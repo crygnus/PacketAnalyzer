@@ -30,6 +30,7 @@ window.ConfigPlaygroundView = Backbone.View.extend({
 	analysis : function(event){
 		event.preventDefault();
     _this = this;
+    debugger
     var pcapPath = sessionStorage.getItem('pcapPath');
     $.ajax({
       url:'/protocolanalyzer/session/analysis',
@@ -87,8 +88,8 @@ window.ConfigPlaygroundView = Backbone.View.extend({
           var indexOfGraphElements=0;
           var mainCounter =0; //for seeing if graph has appropriate number of layer matches
 
-          userParseGraph = e.target.result;
-          var userParsing = userParseGraph.split(/[\{\};]/);
+          _this.userParseGraph = e.target.result;
+          var userParsing = _this.userParseGraph.split(/[\{\};]/);
           for (var i = 0; i < userParsing.length; i++) {
             userParsing[i] = userParsing[i].trim();
             if(userParsing[i].search('graph')===0){
