@@ -58,7 +58,8 @@ public class SessionController {
         long readCount = session.startExperiment(); 
         JSONObject response = new JSONObject();
         response.put("status", "success");
-        response.put("pktCount", readCount);
+        response.put("sessionName", session.getSessionName());
+        response.put("packetCount", readCount);
         return response.toString();
     }
 
