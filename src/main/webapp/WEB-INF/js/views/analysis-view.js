@@ -181,6 +181,21 @@ window.AnalysisView = Backbone.View.extend({
 		render: function () {
         	$(this.el).html(this.template());
 
+          //slider initialization  
+          $(function() {
+            $( "#slider-range-max" ).slider({
+              range: "max",
+              min: 10,
+              max: 1000,
+              value: 50,
+              slide: function( event, ui ) {
+                $( "#prefetch-amount" ).val( ui.value );
+              }
+            });
+            $( "#prefetch-amount" ).val( $( "#slider-range-max" ).slider( "value" ) );
+          });
+
+          //collapsible sidebar intialization
           (function() {
             $(function() {
               var collapseMyMenu, expandMyMenu, hideMenuTexts, showMenuTexts,expandMainMenu,collapseMainMenu;
