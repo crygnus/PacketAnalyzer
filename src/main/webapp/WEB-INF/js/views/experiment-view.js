@@ -6,7 +6,8 @@ window.ExperimentView = Backbone.View.extend({
 			 'click #loadExperiment' : 'loadExperiment',
              'click #attachBtn' : 'readSingleFile',
              'click #help' :'userHelpPage',
-             'click #logout' : 'userLogout'
+             'click #logout' : 'userLogout',
+             'slidechange #slider': 'setPrefetchValue'
 		},
 
 		newExperiment : function(event) {
@@ -40,6 +41,9 @@ window.ExperimentView = Backbone.View.extend({
              });
 
     	},
+        setPrefetchValue : function(){
+            sessionStorage.setItem('sliderValue',$('#slider').slider("option", "value"));  
+        },
     	loadExperiment : function() {
         	
     	},
@@ -72,6 +76,20 @@ window.ExperimentView = Backbone.View.extend({
         },
 		render: function () { 
 			$(this.el).html(this.template());
+            
+            //slider initialization  
+            $(function() {
+                $("#slider").slider({
+                    range: "max",
+                    min: 10,
+                    max: 1000,
+                    value: 50,
+                    slide: function( event, ui ) {
+                        $("#prefetch-amount").val(ui.value);
+                    }
+                });
+                $("#prefetch-amount").val($("#slider").slider("value"));
+            });
             return this;
 		}
 	});

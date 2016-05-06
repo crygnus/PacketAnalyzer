@@ -5,31 +5,33 @@ window.AnalysisView = Backbone.View.extend({
 			 'click #help' :'userHelpPage',
 			 'click #logout': 'userLogout',
 			 'click #populateTable': 'populateTable',
-       'click #packetInfo tbody tr': 'rowClick'
+       'click #packetInfo tbody tr': 'rowClick',
+       'slidechange #slider': 'setPrefetchValue'
 		},
 		initialize: function () {
 			this.delegateEvents();
       this.globalData = [];
 		},
+    setPrefetchValue : function(){
+      sessionStorage.setItem('sliderValue',$('#slider').slider("option", "value"));  
+    },
     rowClick : function(event){
       //get index from table
       var ind = event.currentTarget.children[0].innerHTML;
       var layers = sessionStorage.getItem('layers').split(',');
       //loop through layers and write to footer
       for(var countForLayers=1;countForLayers< layers.length-1;countForLayers++){
-        debugger
         botInfo = this.globalData[ind]["docs"][countForLayers-1]["_source"];
-        stringToWrite =  "";
+        var packetDetails="";
         for(var key in botInfo){
-          stringToWrite+= key + ": " + JSON.stringify(botInfo[key]) + "\n";
+          packetDetails += '<span class ="footerPacketDetails">\t'+key + " : " + JSON.stringify(botInfo[key]).replace(/\"/g, "") +' </span>';
         }
-        //$("#dataContainer1").show();
-        $("#dataContainer"+countForLayers).text(stringToWrite);
+        document.getElementById("dataContainer"+countForLayers).innerHTML = packetDetails;
       }
     },
 		populateTable :function(){
       _this = this;
-      jQuery('#lowerHalf').html('');
+      $('#lowerHalf').html('');
       var sessionName = sessionStorage.getItem('sessionName');
       var layers = sessionStorage.getItem('layers').split(',');
 
@@ -47,15 +49,15 @@ window.AnalysisView = Backbone.View.extend({
           '<article>'+
             '<details>'+
               '<summary >'+layers[i].charAt(0).toUpperCase() + layers[i].slice(1)+'</summary>'+
-              '<details>'+
                 '<summary id = dataContainer'+ i+' ></summary>'+
-              '</details>'+
             '</details>'+
           '</article>'+
           '</section>';
       }
+
       //loop for creating multi-get request and receiving and displaying data
       for(var id = 1;id<=sessionStorage.getItem('packetCount');id++){
+        
         //creating the multi get request from ids and layers
         var multiGetRequest ='{ "docs" : [' ;
         for(var countForLayers = 1;countForLayers<=layerCount;countForLayers++){
@@ -64,108 +66,39 @@ window.AnalysisView = Backbone.View.extend({
         multiGetRequest = multiGetRequest.substring(0,multiGetRequest.length-1);
         multiGetRequest = multiGetRequest.concat('] }');
 
+        //AJAX call for getting data
         (function(id)
         {
-        $.ajax({
-			   url : 'http://localhost:9200/protocol_'+sessionName+'/_mget',
-			   type : 'POST',
-         data : multiGetRequest,
-         async: false,
-			   contentType : 'application/json; charset=utf-8',
-			   success : function(data) {
-          _this.globalData[id] = data;
-          row = data["docs"][0];
-          var td, tr;
-          //$("#packetInfo tbody tr").remove(); // clean table
-          var tdata = $("#packetInfo tbody")
-  			  //for(var row in rows){
-    			 var rowSource = row["_source"];
-    			 tr = $("<tr>");
-    			 //packetId
-    			td = $("<td>").text(rowSource["packetId"]);
-    			tr.append(td);
-    			//Source MAC
-    			td = $("<td>").text(rowSource["src_addr"]);
-    			tr.append(td);
-    			//Dest MAC
-    			td = $("<td>").text(rowSource["dst_addr"]);
-    			tr.append(td);
-				tdata.append(tr);
-  			//}
-  			var defaultColor = $("#packetInfo tbody tr").css('background-color');
-  			//css highlights upon mouse enter
-  			$("#packetInfo tbody tr").mouseenter( function(){
-  				$(this).css("background-color" ,'rgb(100,149,237)');
-  			});
-  			//css highlights upon mouse leave
-  			$("#packetInfo tbody tr").mouseleave( function(){
-  				$(this).css("background-color" ,defaultColor);
-  			});
-  			//update handlers
-  			/*$("#packetInfo tbody tr").click( function(){
-    			var ind = $(this).index();
-    			botInfo = data["docs"][0]["_source"];
-    			stringToWrite =  "";
-    			for(var key in botInfo){
-      				stringToWrite+= key + ": " + JSON.stringify(botInfo[key]) + "\n";
-    			}
-    			//$("#dataContainer1").show();
-    			$("#dataContainer1").text(stringToWrite);
-  			});*/
-  			//mouseover should change the cursor back to s-resize
-  			$("#lowerHalf").mouseover( function() {
-  				if($("#dataContainer1").is(":visible")) {
-  					$("#lowerHalf").css('cursor', 's-resize');
-  				}
-  			});
-  			//close data container
-  			$("#lowerHalf").click( function() {
-  				//$("#dataContainer1").hide();
-  				$("#lowerHalf").css('cursor', 'default');
-  			});
-			},
-			error : function() {
-				alert("Error connecting to elasticsearch!!")
-			}
-		});
-  /*else{
-    $.ajax({
-      url : 'http://localhost:9200/protocol_'+sessionName+'/'+layers[id]+'/_search?&size=214',
-      type : 'GET',
-      contentType : 'application/json; charset=utf-8',
-      dataType : 'text',
-      success : function(data) {
-        //update handlers
-        $("#packetInfo tbody tr").click( function(){
-          var ind = $(this).index();
-          botInfo = data["hits"]["hits"][ind];
-          debugger
-          stringToWrite =  "";
-          for(var key in botInfo){
-              stringToWrite+= key + ": " + JSON.stringify(botInfo[key]) + "\n";
-          }
-          //$("#dataContainer2").show();
-          $("#dataContainer"+id).text(stringToWrite);
-        });
-        //mouseover should change the cursor back to s-resize
-        $("#lowerHalf").mouseover( function() {
-          if($("#dataContainer"+id).is(":visible")) {
-            $("#lowerHalf").css('cursor', 's-resize');
-          }
-        });
-        //close data container
-        $("#lowerHalf").click( function() {
-          //$("#dataContainer2").hide();
-          $("#lowerHalf").css('cursor', 'default');
-        });
-      },
-      error : function() {
-        alert("Error connecting to elasticsearch!!")
+          $.ajax({
+			      url : 'http://localhost:9200/protocol_'+sessionName+'/_mget',
+			      type : 'POST',
+            data : multiGetRequest,
+            async: false,
+			      contentType : 'application/json; charset=utf-8',
+			      success : function(data) {
+              _this.globalData[id] = data;
+              row = data["docs"][0];
+              var td, tr;
+              var tdata = $("#packetInfo tbody")
+    			    var rowSource = row["_source"];
+    			    tr = $("<tr>");
+    			    //packetId
+    			    td = $("<td>").text(rowSource["packetId"]);
+    			    tr.append(td);
+    			    //Source MAC
+    			    td = $("<td>").text(rowSource["src_addr"]);
+    			    tr.append(td);
+    			    //Dest MAC
+    			    td = $("<td>").text(rowSource["dst_addr"]);
+    			    tr.append(td);
+				      tdata.append(tr);
+			      },
+			      error : function() {
+				      alert("Error connecting to elasticsearch!!")
+			      }
+		      });
+        })(id);
       }
-    });
-    }*/
-    })(id);
-    }
 		},
 		userHelpPage : function(){
 			window.open("https://github.com/prasadtalasila/packetanalyzer",'_blank');
@@ -183,16 +116,16 @@ window.AnalysisView = Backbone.View.extend({
 
           //slider initialization  
           $(function() {
-            $( "#slider-range-max" ).slider({
+            $("#slider").slider({
               range: "max",
               min: 10,
               max: 1000,
               value: 50,
               slide: function( event, ui ) {
-                $( "#prefetch-amount" ).val( ui.value );
+                $("#prefetch-amount").val(ui.value);
               }
             });
-            $( "#prefetch-amount" ).val( $( "#slider-range-max" ).slider( "value" ) );
+            $("#prefetch-amount").val($("#slider").slider("value"));
           });
 
           //collapsible sidebar intialization
