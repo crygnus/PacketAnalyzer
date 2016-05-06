@@ -4,7 +4,7 @@ window.AnalysisView = Backbone.View.extend({
 		events: {
 			 'click #help' :'userHelpPage',
 			 'click #logout': 'userLogout',
-			 'click #populateTable': 'populateTable',
+			 'click #populateTable': 'footerDisplay',
        'click #packetInfo tbody tr': 'rowClick',
        'slidechange #slider': 'setPrefetchValue'
 		},
@@ -20,14 +20,16 @@ window.AnalysisView = Backbone.View.extend({
       var currentRow = event.currentTarget.children[0].innerHTML;
       //count number of layers, subtract 2 to discount start and endof p4 graph
       var layersCount = sessionStorage.getItem('layers').split(',').length -2;
+      var packetCount = sessionStorage.getItem('packetCount');
       //loop through layers and write to footer
-      for(var countForLayers=1;countForLayers<=layersCount;countForLayers++){
-        botInfo = this.globalData[currentRow]["docs"][countForLayers-1]["_source"];
+      for(var countForLayers=0;countForLayers<layersCount;countForLayers++){
+        botInfo = this.globalData["docs"][(currentRow-1)+(countForLayers*packetCount)]["_source"];
         var packetDetails="";
         for(var key in botInfo){
           packetDetails += '<span class ="footerPacketDetails">\t'+key + " : " + JSON.stringify(botInfo[key]).replace(/\"/g, "") +' </span>';
         }
-        document.getElementById("dataContainer"+countForLayers).innerHTML = packetDetails;
+        var countForLayers2 = countForLayers+1;
+        document.getElementById("dataContainer"+countForLayers2).innerHTML = packetDetails;
       }
 
       //multi get data based on which row user is on
@@ -39,7 +41,7 @@ window.AnalysisView = Backbone.View.extend({
         this.multiGet(lastRow+1,lastRow +(sliderValue - rowDiff),layersCount);
       }
     },
-		populateTable :function(){
+		footerDisplay :function(){
       _this = this;
       $('#lowerHalf').html('');
       var layerCount =0; //for knowing number of layers
@@ -80,21 +82,19 @@ window.AnalysisView = Backbone.View.extend({
       if(endId > sessionStorage.getItem('packetCount')){
         endId = sessionStorage.getItem('packetCount');
       }
-      var sessionName = sessionStorage.getItem('sessionName');
-      var layers = sessionStorage.getItem('layers').split(',');
-      for(var id = startId;id<=endId;id++){
-        
-        //creating the multi get request from ids and layers
+      if(startId<endId){
+        var sessionName = sessionStorage.getItem('sessionName');
+        var layers = sessionStorage.getItem('layers').split(',');
         var multiGetRequest ='{ "docs" : [' ;
         for(var countForLayers = 1;countForLayers<=layerCount;countForLayers++){
-          multiGetRequest = multiGetRequest.concat('{ "_type" : "'+layers[countForLayers]+'", "_id" : "'+id+'" },');
+          //creating the multi get request from ids and layers
+          for(var id = startId;id<=endId;id++){
+            multiGetRequest = multiGetRequest.concat('{ "_type" : "'+layers[countForLayers]+'", "_id" : "'+id+'" },');
+          }
         }
         multiGetRequest = multiGetRequest.substring(0,multiGetRequest.length-1);
         multiGetRequest = multiGetRequest.concat('] }');
-
-        //AJAX call for getting data
-        (function(id)
-        {
+          //AJAX call for getting data
           $.ajax({
             url : 'http://localhost:9200/protocol_'+sessionName+'/_mget',
             type : 'POST',
@@ -102,28 +102,32 @@ window.AnalysisView = Backbone.View.extend({
             async: false,
             contentType : 'application/json; charset=utf-8',
             success : function(data) {
-              _this.globalData[id] = data;
-              row = data["docs"][0];
-              var td, tr;
-              var tdata = $("#packetInfo tbody")
-              var rowSource = row["_source"];
-              tr = $("<tr>");
-              //packetId
-              td = $("<td>").text(rowSource["packetId"]);
-              tr.append(td);
-              //Source MAC
-              td = $("<td>").text(rowSource["src_addr"]);
-              tr.append(td);
-              //Dest MAC
-              td = $("<td>").text(rowSource["dst_addr"]);
-              tr.append(td);
-              tdata.append(tr);
+              _this.globalData = data;
+              _this.populateTable(startId,endId);
             },
             error : function() {
               alert("Error connecting to elasticsearch!!")
             }
           });
-        })(id);
+        }
+    },
+    populateTable:function(startId,endId){
+      for(var id=startId-1; id<endId;id++){
+          var row = this.globalData["docs"][id];
+          var td, tr;
+          var tdata = $("#packetInfo tbody")
+          var rowSource = row["_source"];
+          tr = $("<tr>");
+          //packetId
+          td = $("<td>").text(rowSource["packetId"]);
+          tr.append(td);
+          //Source MAC
+          td = $("<td>").text(rowSource["src_addr"]);
+          tr.append(td);
+          //Dest MAC
+          td = $("<td>").text(rowSource["dst_addr"]);
+          tr.append(td);
+          tdata.append(tr);
       }
     },
 		render: function () {
