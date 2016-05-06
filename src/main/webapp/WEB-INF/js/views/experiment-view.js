@@ -18,7 +18,10 @@ window.ExperimentView = Backbone.View.extend({
         		experimenter : $('#experimenter').val(),
         		pcapPath : $('#pcapPath').val()
         	};
+            //for passing to backend
             sessionStorage.setItem('pcapPath', $('#pcapPath').val());
+            //set dafult slider value
+            sessionStorage.setItem('sliderValue',50); 
             $.ajax({
             url:'/protocolanalyzer/sessioninfo',
              type:'POST',
@@ -81,8 +84,9 @@ window.ExperimentView = Backbone.View.extend({
             $(function() {
                 $("#slider").slider({
                     range: "max",
-                    min: 10,
+                    min: 20,
                     max: 1000,
+                    step:10,
                     value: 50,
                     slide: function( event, ui ) {
                         $("#prefetch-amount").val(ui.value);

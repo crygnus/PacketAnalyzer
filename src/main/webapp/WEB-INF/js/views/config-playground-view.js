@@ -192,8 +192,9 @@ window.ConfigPlaygroundView = Backbone.View.extend({
     $(function() {
       $("#slider").slider({
         range: "max",
-        min: 10,
+        min: 20,
         max: 1000,
+        step:10,
         value: 50,
         slide: function( event, ui ) {
           $("#prefetch-amount").val(ui.value);
