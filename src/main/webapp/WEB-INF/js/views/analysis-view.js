@@ -99,7 +99,6 @@ window.AnalysisView = Backbone.View.extend({
             url : 'http://localhost:9200/protocol_'+sessionName+'/_mget',
             type : 'POST',
             data : multiGetRequest,
-            async: false,
             contentType : 'application/json; charset=utf-8',
             success : function(data) {
               _this.globalData = data;
