@@ -18,9 +18,10 @@ window.AnalysisView = Backbone.View.extend({
     rowClick : function(event){
       //get index from table
       var currentRow = event.currentTarget.children[0].innerHTML;
-      var layers = sessionStorage.getItem('layers').split(',');
+      //count number of layers, subtract 2 to discount start and endof p4 graph
+      var layersCount = sessionStorage.getItem('layers').split(',').length -2;
       //loop through layers and write to footer
-      for(var countForLayers=1;countForLayers< layers.length-1;countForLayers++){
+      for(var countForLayers=1;countForLayers<=layersCount;countForLayers++){
         botInfo = this.globalData[currentRow]["docs"][countForLayers-1]["_source"];
         var packetDetails="";
         for(var key in botInfo){
@@ -35,7 +36,7 @@ window.AnalysisView = Backbone.View.extend({
       var rowDiff = lastRow - currentRow;
       var sliderValue = sessionStorage.getItem('sliderValue'); 
       if(rowDiff< sliderValue){
-        this.multiGet(lastRow+1,lastRow +(sliderValue - rowDiff),3);
+        this.multiGet(lastRow+1,lastRow +(sliderValue - rowDiff),layersCount);
       }
     },
 		populateTable :function(){
@@ -76,6 +77,9 @@ window.AnalysisView = Backbone.View.extend({
         	return false;
 		},
     multiGet : function(startId,endId,layerCount){
+      if(endId > sessionStorage.getItem('packetCount')){
+        endId = sessionStorage.getItem('packetCount');
+      }
       var sessionName = sessionStorage.getItem('sessionName');
       var layers = sessionStorage.getItem('layers').split(',');
       for(var id = startId;id<=endId;id++){
