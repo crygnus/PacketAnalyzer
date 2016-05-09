@@ -10,33 +10,25 @@ import org.springframework.data.elasticsearch.annotations.Document;
 @Setter
 @Document(
     indexName = "protocol",
-    type = "ipv4"
+    type = "ipv6"
 )
-public class IPv4Entity {
+public class IPv6Entity {
   @Id
   private long packetId;
 
-  private String totalLen;
+  private int flowLabel;
 
   private String dstAddr;
 
-  private short diffserv;
+  private String nextHdr;
 
   private byte version;
 
-  private String hdrChecksum;
+  private short hopLimit;
 
-  private int identification;
+  private int payloadLen;
+
+  private short trafficClass;
 
   private String srcAddr;
-
-  private byte flags;
-
-  private short fragOffset;
-
-  private byte ihl;
-
-  private String protocol;
-
-  private short ttl;
 }
