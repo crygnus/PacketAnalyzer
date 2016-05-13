@@ -45,6 +45,9 @@ window.AnalysisView = Backbone.View.extend({
       $("#packetInfo tr").remove(); 
       _this = this;
       $('#lowerHalf').html('');
+      $('#lowerHalfTitle').click(function() {
+          $('#lowerHalf').toggle();
+      });
       var layerCount =0; //for knowing number of layers
       var layers = sessionStorage.getItem('layers').split(',');    
       //loop for appending required number of summary tags in the footer for full display of each layer
